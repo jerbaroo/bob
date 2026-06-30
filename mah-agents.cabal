@@ -52,7 +52,7 @@ extra-doc-files:    CHANGELOG.md
 -- extra-source-files:
 
 common warnings
-    ghc-options: -Wall
+    ghc-options: -Wall -Wno-ambiguous-fields
 
 library
     -- Import common warning flags.
@@ -60,9 +60,32 @@ library
 
     -- Modules exported by the library.
     exposed-modules:  Mah.Agents
+                    , Mah.Agents.Effect.Agent
+                    , Mah.Agents.Effect.Console
+                    , Mah.Agents.Pretty
+                    , Mah.Agents.State.AgentId
+                    , Mah.Agents.State.AgentInput
+                    , Mah.Agents.State.AgentOutput
+                    , Mah.Agents.State.AgentResolution
+                    , Mah.Agents.State.AgentTask
+                    , Mah.Agents.State.AgentThought
+                    , Mah.Agents.State.AgentTool
+                    , Mah.Agents.State.Command
+                    , Mah.Agents.State.Event
+                    , Mah.Agents.State.HarnessState
 
     -- Modules included in this library but not exported.
     -- other-modules:
+
+    default-extensions: AllowAmbiguousTypes
+                      , BlockArguments
+                      , DuplicateRecordFields
+                      , NoFieldSelectors
+                      , OverloadedRecordDot
+                      , OverloadedStrings
+                      , RecordWildCards
+                      , TemplateHaskell
+                      , TypeFamilies
 
     -- LANGUAGE extensions used by modules in this package.
     -- other-extensions:
@@ -70,6 +93,7 @@ library
     -- Other library packages from which modules are imported.
     build-depends:    base ^>=4.20.2.0
                     , containers
+                    , extra
                     , heftia
                     , text
                     , witch
