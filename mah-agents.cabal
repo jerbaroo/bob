@@ -60,6 +60,7 @@ library
 
     -- Modules exported by the library.
     exposed-modules:  Mah.Agents
+                    , Mah.Agents.Config
                     , Mah.Agents.Effect.Agent
                     , Mah.Agents.Effect.Console
                     , Mah.Agents.Pretty
@@ -95,6 +96,7 @@ library
                     , containers
                     , extra
                     , heftia
+                    , heftia-effects
                     , text
                     , witch
 

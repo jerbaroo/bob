@@ -1,11 +1,13 @@
 module Mah.Agents where
 
 import Control.Monad.Hefty
+import Data.Effect.Reader (runAsk)
 import Data.Either.Extra (maybeToEither)
 import Data.Map qualified as Map
 import Data.Maybe (fromMaybe)
 import Data.Text (Text)
 import Prelude hiding (read)
+import Mah.Agents.Config (Config(..))
 import Mah.Agents.State.AgentId (AgentId(..))
 import Mah.Agents.State.Command (Command(..))
 import Mah.Agents.State.Command qualified as Command
@@ -34,9 +36,9 @@ recordEvent :: AgentId -> Event -> HarnessState -> HarnessState
 recordEvent agentId event HarnessState{..} =
   let state' = HarnessState
         { events =
-          let f Nothing = Just [event]
-              f (Just events') = Just $ event : events'
-          in Map.alter f agentId events
+            let f Nothing = Just [event]
+                f (Just events') = Just $ event : events'
+            in Map.alter f agentId events
         , tasks
         }
   in case event of
@@ -71,6 +73,9 @@ runCommand agentId command harnessState = do
   runCommand agentId Command.ReadConsole harnessState
 
 main :: IO ()
-main = runEff . runAgent . runConsole $ do
-  writeConsoleLn "Welcome. How may I help you?"
-  run (AgentId 0) Command.ReadConsole emptyHarnessState
+main = do
+  let config = Config "foo" "bar"
+  runEff . runAsk config . runAgent . runConsole  $ do
+    writeConsoleLn $ "Config:" <> pretty config
+    writeConsoleLn "Welcome. How may I help you?"
+    run (AgentId 0) Command.ReadConsole emptyHarnessState
