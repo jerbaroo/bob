@@ -1,4 +1,4 @@
-module Mah.Agents.State.AgentThought where
+module Mah.Agents.Data.AgentThought where
 
 import Data.String (IsString(..))
 import Data.Text (Text)

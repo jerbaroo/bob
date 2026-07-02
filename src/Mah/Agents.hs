@@ -7,15 +7,15 @@ import Data.Map qualified as Map
 import Data.Maybe (fromMaybe)
 import Data.Text (Text)
 import Prelude hiding (read)
-import Mah.Agents.Config (Config(..))
-import Mah.Agents.State.AgentId (AgentId(..))
-import Mah.Agents.State.Command (Command(..))
-import Mah.Agents.State.Command qualified as Command
-import Mah.Agents.State.Event (Event(..))
+import Mah.Agents.Data.AgentId (AgentId(..))
+import Mah.Agents.Data.Command (Command(..))
+import Mah.Agents.Data.Command qualified as Command
+import Mah.Agents.Data.Config (Config(..))
+import Mah.Agents.Data.Event (Event(..))
 import Mah.Agents.Effect.Agent (Agent(..), runAgent)
 import Mah.Agents.Effect.Console (Console, readPrompt, runConsole, writeConsoleLn)
-import Mah.Agents.State.AgentInput (AgentInput(..))
-import Mah.Agents.State.HarnessState (HarnessState(..), emptyHarnessState)
+import Mah.Agents.Data.AgentInput (AgentInput(..))
+import Mah.Agents.Data.HarnessState (HarnessState(..), emptyHarnessState)
 import Mah.Agents.Pretty (Pretty(..))
 import Witch (from)
 
@@ -54,7 +54,7 @@ run
 run agentId command harnessState = do
   -- Run the command.
   (event, nextCommand) <- runCommand agentId command harnessState
-  -- Record the command run, and the resulting event.
+  -- Record the command, and the resulting event.
   let nextHarnessState = recordEvent agentId event
         $ recordEvent agentId (Event_CommandRun command) harnessState
   -- Run the next command.
@@ -74,7 +74,7 @@ runCommand agentId command harnessState = do
 
 main :: IO ()
 main = do
-  let config = Config "foo" "bar"
+  let config = Config "foo" "bar" 0.7
   runEff . runAsk config . runAgent . runConsole  $ do
     writeConsoleLn $ "Config:" <> pretty config
     writeConsoleLn "Welcome. How may I help you?"

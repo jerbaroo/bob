@@ -1,8 +1,8 @@
-module Mah.Agents.State.AgentInput where
+module Mah.Agents.Data.AgentInput where
 
 import Data.Text (Text)
-import Mah.Agents.State.AgentTask (AgentTask)
-import Mah.Agents.State.Event (Event)
+import Mah.Agents.Data.AgentTask (AgentTask)
+import Mah.Agents.Data.Event (Event)
 
 -- | Input available to an agent.
 data AgentInput = AgentInput

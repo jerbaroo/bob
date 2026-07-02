@@ -1,9 +1,9 @@
-module Mah.Agents.State.Command where
+module Mah.Agents.Data.Command where
 
 import Data.Text (Text)
 import Mah.Agents.Pretty (Pretty(..))
-import Mah.Agents.State.AgentId (AgentId)
-import Mah.Agents.State.AgentTool (AgentTool, AgentToolArgs)
+import Mah.Agents.Data.AgentId (AgentId)
+import Mah.Agents.Data.AgentTool (AgentTool, AgentToolArgs)
 import Witch (from)
 
 -- | A side-effect the harness needs to perform.

@@ -1,4 +1,4 @@
-module Mah.Agents.State.AgentId where
+module Mah.Agents.Data.AgentId where
 
 import Witch (From(..))
 import Mah.Agents.Pretty (Pretty(..))

@@ -1,4 +1,4 @@
-module Mah.Agents.State.AgentTask where
+module Mah.Agents.Data.AgentTask where
 
 import Data.String (IsString(..))
 import Data.Text (Text)

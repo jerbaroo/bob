@@ -1,8 +1,8 @@
-module Mah.Agents.State.AgentOutput where
+module Mah.Agents.Data.AgentOutput where
 
-import Mah.Agents.State.AgentResolution (AgentResolution)
-import Mah.Agents.State.AgentTask (AgentTask)
-import Mah.Agents.State.AgentThought (AgentThought)
+import Mah.Agents.Data.AgentResolution (AgentResolution)
+import Mah.Agents.Data.AgentTask (AgentTask)
+import Mah.Agents.Data.AgentThought (AgentThought)
 
 -- | The final output from the agent.
 data AgentOutput = AgentOutput

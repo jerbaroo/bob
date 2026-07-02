@@ -1,9 +1,9 @@
-module Mah.Agents.State.Event where
+module Mah.Agents.Data.Event where
 
 import Data.Text (Text)
-import Mah.Agents.State.AgentOutput (AgentOutput)
-import Mah.Agents.State.AgentTool (AgentTool, AgentToolArgs)
-import Mah.Agents.State.Command (Command)
+import Mah.Agents.Data.AgentOutput (AgentOutput)
+import Mah.Agents.Data.AgentTool (AgentTool, AgentToolArgs)
+import Mah.Agents.Data.Command (Command)
 
 -- | Something that has happened.
 data Event

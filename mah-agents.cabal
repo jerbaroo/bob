@@ -60,20 +60,21 @@ library
 
     -- Modules exported by the library.
     exposed-modules:  Mah.Agents
-                    , Mah.Agents.Config
+                    , Mah.Agents.Data.AgentId
+                    , Mah.Agents.Data.AgentInput
+                    , Mah.Agents.Data.AgentOutput
+                    , Mah.Agents.Data.AgentResolution
+                    , Mah.Agents.Data.AgentTask
+                    , Mah.Agents.Data.AgentThought
+                    , Mah.Agents.Data.AgentTool
+                    , Mah.Agents.Data.Command
+                    , Mah.Agents.Data.Config
+                    , Mah.Agents.Data.Event
+                    , Mah.Agents.Data.HarnessState
+                    , Mah.Agents.Data.Temperature
                     , Mah.Agents.Effect.Agent
                     , Mah.Agents.Effect.Console
                     , Mah.Agents.Pretty
-                    , Mah.Agents.State.AgentId
-                    , Mah.Agents.State.AgentInput
-                    , Mah.Agents.State.AgentOutput
-                    , Mah.Agents.State.AgentResolution
-                    , Mah.Agents.State.AgentTask
-                    , Mah.Agents.State.AgentThought
-                    , Mah.Agents.State.AgentTool
-                    , Mah.Agents.State.Command
-                    , Mah.Agents.State.Event
-                    , Mah.Agents.State.HarnessState
 
     -- Modules included in this library but not exported.
     -- other-modules:

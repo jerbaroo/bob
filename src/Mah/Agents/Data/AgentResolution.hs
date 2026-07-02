@@ -1,4 +1,4 @@
-module Mah.Agents.State.AgentResolution where
+module Mah.Agents.Data.AgentResolution where
 
 import Data.String (IsString(..))
 import Data.Text (Text)

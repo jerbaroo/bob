@@ -1,11 +1,11 @@
-module Mah.Agents.State.HarnessState where
+module Mah.Agents.Data.HarnessState where
 
 import Data.Map (Map)
 import Data.Map qualified as Map
 import Prelude hiding (read)
-import Mah.Agents.State.AgentId (AgentId)
-import Mah.Agents.State.AgentTask (AgentTask)
-import Mah.Agents.State.Event (Event)
+import Mah.Agents.Data.AgentId (AgentId)
+import Mah.Agents.Data.AgentTask (AgentTask)
+import Mah.Agents.Data.Event (Event)
 
 data HarnessState = HarnessState
   { events :: Map AgentId [Event]

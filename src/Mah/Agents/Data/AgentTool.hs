@@ -1,4 +1,4 @@
-module Mah.Agents.State.AgentTool where
+module Mah.Agents.Data.AgentTool where
 
 import Data.Text (Text)
 

@@ -2,9 +2,9 @@ module Mah.Agents.Effect.Agent where
 
 import Control.Monad.Hefty (Effect, Eff, Emb, makeEffectF, (:>), type (~>), interpret)
 import Data.Effect.Reader (Ask)
-import Mah.Agents.Config (Config)
-import Mah.Agents.State.AgentInput (AgentInput)
-import Mah.Agents.State.AgentOutput (AgentOutput(..))
+import Mah.Agents.Data.AgentInput (AgentInput)
+import Mah.Agents.Data.AgentOutput (AgentOutput(..))
+import Mah.Agents.Data.Config (Config)
 
 data Agent :: Effect where
   CallAgent :: AgentInput -> Agent f AgentOutput
