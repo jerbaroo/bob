@@ -2,32 +2,31 @@ module Mah.Agents where
 
 import Control.Monad.Hefty
 import Data.Effect.Reader (runAsk)
-import Data.Either.Extra (maybeToEither)
+import Data.Functor ((<&>))
 import Data.Map qualified as Map
 import Data.Maybe (fromMaybe)
-import Data.Text (Text)
 import Prelude hiding (read)
 import Mah.Agents.Data.AgentId (AgentId(..))
 import Mah.Agents.Data.Command (Command(..))
 import Mah.Agents.Data.Command qualified as Command
 import Mah.Agents.Data.Config (Config(..))
 import Mah.Agents.Data.Event (Event(..), IsEvent(..))
-import Mah.Agents.Effect.Agent (Agent(..), runAgent)
+import Mah.Agents.Effect.Agent (Agent(..), callAgent, runAgent)
 import Mah.Agents.Effect.Console (Console, readUserInput, runConsole, writeConsoleLn)
 import Mah.Agents.Data.AgentInput (AgentInput(..))
-import Mah.Agents.Data.HarnessState (HarnessState(..), emptyHarnessState)
+import Mah.Agents.Data.HarnessState (HarnessState(..), mkHarnessState)
+import Mah.Agents.Data.UserInput (UserInput(..))
 import Mah.Agents.Pretty (Pretty(..))
 import Witch (from)
 
 -- | Input to an agent derived from the harness state.
-agentInput :: AgentId -> Text -> HarnessState -> Either Text AgentInput
-agentInput agentId userInput HarnessState{..} = do
-  tasks' <- maybeToEither ("Task for " <> pretty agentId <> " not found") $
-    Map.lookup agentId tasks
-  let agentEvents = fromMaybe [] $ Map.lookup agentId events
-  pure AgentInput
-    { events = agentEvents
-    , tasks = tasks'
+mkAgentInput :: AgentId -> UserInput -> HarnessState -> AgentInput
+mkAgentInput agentId userInput HarnessState{..} =
+  AgentInput
+    { events = fromMaybe [] $ Map.lookup agentId events
+    , model = "Qwen"
+    , tasks = fromMaybe [] $ Map.lookup agentId tasks
+    , temperature = 0.7
     , userInput
     }
 
@@ -40,6 +39,7 @@ recordEvent agentId event HarnessState{..} =
                 f (Just events') = Just $ event : events'
             in Map.alter f agentId events
         , tasks = maybe tasks (Map.singleton agentId) $ eventTasks event
+        , ..
         }
 
 run
@@ -63,16 +63,21 @@ runCommand
   -> Command -- ^ The command to run.
   -> HarnessState -- ^ The current state.
   -> Eff es (Event, Command)
-runCommand agentId Command.ReadConsole _ =
-  (, Command.CallAgent agentId) . from <$> readUserInput
+runCommand _agentId Command.ReadConsole _ =
+  readUserInput <&> \userInput ->
+    (from userInput, Command.CallAgent userInput)
+runCommand agentId (Command.CallAgent userInput) harnessState = do
+  agentOutput <- callAgent (mkAgentInput agentId userInput harnessState)
+  writeConsoleLn $ "Agent output: " <> from (show agentOutput)
+  pure $ (from agentOutput, Command.ReadConsole)
 runCommand agentId command harnessState = do
   writeConsoleLn $ "Command not supported: " <> from (show command)
   runCommand agentId Command.ReadConsole harnessState
 
 main :: IO ()
 main = do
-  let config = Config 0.7 "127.0.0.1:8080"
+  let config = Config 0.7 "http://127.0.0.1:8080/v1/chat/completions"
   runEff . runAsk config . runAgent . runConsole  $ do
     writeConsoleLn $ "Config:" <> pretty config
     writeConsoleLn "Welcome. How may I help you?"
-    run (AgentId 0) Command.ReadConsole emptyHarnessState
+    run (AgentId 0) Command.ReadConsole $ mkHarnessState config

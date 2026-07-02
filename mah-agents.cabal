@@ -71,6 +71,7 @@ library
                     , Mah.Agents.Data.Config
                     , Mah.Agents.Data.Event
                     , Mah.Agents.Data.HarnessState
+                    , Mah.Agents.Data.Message
                     , Mah.Agents.Data.Temperature
                     , Mah.Agents.Data.UserInput
                     , Mah.Agents.Effect.Agent
@@ -94,11 +95,13 @@ library
     -- other-extensions:
 
     -- Other library packages from which modules are imported.
-    build-depends:    base
+    build-depends:    aeson
+                    , base
                     , containers
                     , extra
                     , heftia
                     , heftia-effects
+                    , request
                     , text
                     , witch
 

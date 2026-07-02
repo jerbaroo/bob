@@ -6,10 +6,12 @@ import Mah.Agents.Data.Event (IsEvent(..))
 import Witch (From(..), via)
 
 newtype UserInput = UserInput Text
-  deriving (From Text)
+  deriving (From Text, Show)
 
 instance From String UserInput where
   from = via @Text
+
+instance From UserInput Text
 
 instance IsEvent UserInput
 

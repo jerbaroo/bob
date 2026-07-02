@@ -5,9 +5,12 @@ import Data.Text (Text)
 import Witch (From(..), via)
 
 newtype AgentThought = AgentThought Text
-  deriving (From Text)
-
-instance IsString AgentThought where
-  fromString = via @Text
+  deriving newtype (From Text, Show)
 
 instance From AgentThought Text
+
+instance From String AgentThought where
+  from = via @Text
+
+instance IsString AgentThought where
+  fromString = from

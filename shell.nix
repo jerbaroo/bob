@@ -4,9 +4,9 @@ let
 in
 project.shellFor {
   exactDeps = true;
-  buildInputs = [
-    pkgs.ghcid
-    pkgs.postgresql
+  buildInputs = with pkgs; [
+    ghcid
+    postgresql
   ];
   tools = {
     cabal = "latest";
