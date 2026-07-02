@@ -93,7 +93,7 @@ library
     -- other-extensions:
 
     -- Other library packages from which modules are imported.
-    build-depends:    base ^>=4.20.2.0
+    build-depends:    base
                     , containers
                     , extra
                     , heftia
@@ -122,7 +122,7 @@ executable mah-agents
 
     -- Other library packages from which modules are imported.
     build-depends:
-        base ^>=4.20.2.0,
+        base,
         mah-agents
 
     -- Directories containing source files.
@@ -155,5 +155,5 @@ test-suite mah-agents-test
 
     -- Test dependencies.
     build-depends:
-        base ^>=4.20.2.0,
+        base,
         mah-agents
