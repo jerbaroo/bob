@@ -72,6 +72,7 @@ library
                     , Mah.Agents.Data.Event
                     , Mah.Agents.Data.HarnessState
                     , Mah.Agents.Data.Temperature
+                    , Mah.Agents.Data.UserInput
                     , Mah.Agents.Effect.Agent
                     , Mah.Agents.Effect.Console
                     , Mah.Agents.Pretty

@@ -1,16 +1,17 @@
 module Mah.Agents.Data.Event where
 
-import Data.Text (Text)
-import Mah.Agents.Data.AgentOutput (AgentOutput)
-import Mah.Agents.Data.AgentTool (AgentTool, AgentToolArgs)
-import Mah.Agents.Data.Command (Command)
+import Mah.Agents.Data.AgentTask (AgentTask)
+import Witch (From(..))
+
+data Event = forall e. IsEvent e => Event e
+
+instance IsEvent Event where
+  eventTasks (Event e) = eventTasks e
 
 -- | Something that has happened.
-data Event
-  = Event_AgentCall
-  | Event_AgentOutput AgentOutput
-  | Event_CommandRun Command
-  -- | Event_AgentSpawned AgentId AgentId Task
-  | Event_ToolCall AgentTool AgentToolArgs -- TODO include output
-  -- | User_AgentCancel
-  | Event_UserInput Text
+class IsEvent e where
+  eventTasks :: e -> Maybe [AgentTask]
+  eventTasks _ = Nothing
+
+instance IsEvent e => From e Event where
+  from = Event

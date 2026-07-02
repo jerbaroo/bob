@@ -11,9 +11,9 @@ import Mah.Agents.Data.AgentId (AgentId(..))
 import Mah.Agents.Data.Command (Command(..))
 import Mah.Agents.Data.Command qualified as Command
 import Mah.Agents.Data.Config (Config(..))
-import Mah.Agents.Data.Event (Event(..))
+import Mah.Agents.Data.Event (Event(..), IsEvent(..))
 import Mah.Agents.Effect.Agent (Agent(..), runAgent)
-import Mah.Agents.Effect.Console (Console, readPrompt, runConsole, writeConsoleLn)
+import Mah.Agents.Effect.Console (Console, readUserInput, runConsole, writeConsoleLn)
 import Mah.Agents.Data.AgentInput (AgentInput(..))
 import Mah.Agents.Data.HarnessState (HarnessState(..), emptyHarnessState)
 import Mah.Agents.Pretty (Pretty(..))
@@ -34,16 +34,13 @@ agentInput agentId userInput HarnessState{..} = do
 -- | Update the harness state with a new event.
 recordEvent :: AgentId -> Event -> HarnessState -> HarnessState
 recordEvent agentId event HarnessState{..} =
-  let state' = HarnessState
+  HarnessState
         { events =
             let f Nothing = Just [event]
                 f (Just events') = Just $ event : events'
             in Map.alter f agentId events
-        , tasks
+        , tasks = maybe tasks (Map.singleton agentId) $ eventTasks event
         }
-  in case event of
-    Event_AgentOutput{} -> state' { tasks = Map.delete agentId tasks }
-    _ -> state'
 
 run
   :: (Agent :> es, Console :> es)
@@ -56,7 +53,7 @@ run agentId command harnessState = do
   (event, nextCommand) <- runCommand agentId command harnessState
   -- Record the command, and the resulting event.
   let nextHarnessState = recordEvent agentId event
-        $ recordEvent agentId (Event_CommandRun command) harnessState
+        $ recordEvent agentId (from command) harnessState
   -- Run the next command.
   run agentId nextCommand nextHarnessState
 
@@ -67,14 +64,14 @@ runCommand
   -> HarnessState -- ^ The current state.
   -> Eff es (Event, Command)
 runCommand agentId Command.ReadConsole _ =
-  (, Command.CallAgent agentId) . Event_UserInput <$> readPrompt
+  (, Command.CallAgent agentId) . from <$> readUserInput
 runCommand agentId command harnessState = do
   writeConsoleLn $ "Command not supported: " <> from (show command)
   runCommand agentId Command.ReadConsole harnessState
 
 main :: IO ()
 main = do
-  let config = Config "foo" "bar" 0.7
+  let config = Config 0.7 "127.0.0.1:8080"
   runEff . runAsk config . runAgent . runConsole  $ do
     writeConsoleLn $ "Config:" <> pretty config
     writeConsoleLn "Welcome. How may I help you?"

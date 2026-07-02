@@ -4,6 +4,7 @@ import Data.Text (Text)
 import Mah.Agents.Pretty (Pretty(..))
 import Mah.Agents.Data.AgentId (AgentId)
 import Mah.Agents.Data.AgentTool (AgentTool, AgentToolArgs)
+import Mah.Agents.Data.Event (IsEvent(..))
 import Witch (from)
 
 -- | A side-effect the harness needs to perform.
@@ -13,6 +14,8 @@ data Command
   | ReadConsole
   | WriteConsole Text
   deriving Show
+
+instance IsEvent Command
 
 instance Pretty Command where
   pretty (CallAgent agentId) = "Call " <> pretty agentId
