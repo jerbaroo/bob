@@ -1,8 +1,12 @@
 module Mah.Agents.Effect.Console where
 
+import Control.Monad (when)
 import Control.Monad.Hefty (Effect, Eff, Emb, makeEffectF, (:>), type (~>), interpret, liftIO)
+import Data.Effect.Reader (Ask, asks)
 import Data.Text (Text)
 import Data.Text qualified as Text
+import Mah.Agents.Data.Config (Config(..))
+import Mah.Agents.Data.Level (Level(..))
 import Mah.Agents.Data.Role (Role(..))
 import Mah.Agents.Data.UserInput (UserInput(..))
 import Mah.Agents.Pretty qualified as Pretty
@@ -31,10 +35,12 @@ readUserInput = do
   writeConsole "> "
   readConsole
 
-writeSection :: (Console :> es) => Role -> Text -> Eff es ()
-writeSection role message = do
-  writeSeparator role
-  writeConsole $ Text.stripEnd message <> "\n"
+writeSection :: (Ask Config :> es, Console :> es) => Level -> Role -> Text -> Eff es ()
+writeSection level role message = do
+  level' <- asks (.level)
+  when (level' >= level) do
+    writeSeparator role
+    writeConsole $ Text.stripEnd message <> "\n"
 
 writeSeparator :: (Console :> es) => Role -> Eff es ()
 writeSeparator role =

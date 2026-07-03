@@ -28,8 +28,8 @@ data AgentInput = AgentInput
 instance Aeson.ToJSON AgentInput where
   toJSON AgentInput{..} =
     Aeson.object
-      [ ("model", Aeson.toJSON model)
-      , ("messages", Aeson.toJSON messages)
+      [ ("messages", Aeson.toJSON messages)
+      , ("model", Aeson.toJSON model)
       , ("response_format", Aeson.object [("type", "json_object")])
       , ("temperature", Aeson.toJSON temperature)
       ]

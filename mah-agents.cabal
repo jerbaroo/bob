@@ -68,6 +68,7 @@ library
                     , Mah.Agents.Data.Event
                     , Mah.Agents.Data.FinishReason
                     , Mah.Agents.Data.HarnessState
+                    , Mah.Agents.Data.Level
                     , Mah.Agents.Data.Message
                     , Mah.Agents.Data.Resolution
                     , Mah.Agents.Data.Role
