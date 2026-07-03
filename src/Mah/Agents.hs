@@ -1,21 +1,24 @@
 module Mah.Agents where
 
-import Control.Monad.Hefty
+import Control.Monad.Extra (whenJust)
+import Control.Monad.Hefty (Eff, (:>), runEff)
 import Data.Effect.Reader (runAsk)
 import Data.Functor ((<&>))
 import Data.Map qualified as Map
 import Data.Maybe (fromMaybe)
 import Prelude hiding (read)
 import Mah.Agents.Data.AgentId (AgentId(..))
+import Mah.Agents.Data.AgentInput (AgentInput(..))
+import Mah.Agents.Data.AgentOutput (AgentOutput(..))
 import Mah.Agents.Data.Command (Command(..))
 import Mah.Agents.Data.Command qualified as Command
 import Mah.Agents.Data.Config (Config(..))
 import Mah.Agents.Data.Event (Event(..), IsEvent(..))
-import Mah.Agents.Effect.Agent (Agent(..), callAgent, runAgent)
-import Mah.Agents.Effect.Console (Console, readUserInput, runConsole, writeConsoleLn)
-import Mah.Agents.Data.AgentInput (AgentInput(..))
 import Mah.Agents.Data.HarnessState (HarnessState(..), mkHarnessState)
 import Mah.Agents.Data.UserInput (UserInput(..))
+import Mah.Agents.Data.Role (Role(..))
+import Mah.Agents.Effect.Agent (Agent(..), callAgent, runAgent)
+import Mah.Agents.Effect.Console (Console, readUserInput, runConsole, writeConsoleLn)
 import Mah.Agents.Pretty (Pretty(..))
 import Witch (from)
 
@@ -68,16 +71,15 @@ runCommand _agentId Command.ReadConsole _ =
     (from userInput, Command.CallAgent userInput)
 runCommand agentId (Command.CallAgent userInput) harnessState = do
   agentOutput <- callAgent (mkAgentInput agentId userInput harnessState)
-  writeConsoleLn $ "Agent output: " <> from (show agentOutput)
+  whenJust agentOutput.thinking $ writeConsoleLn Assistant . from . pretty
   pure $ (from agentOutput, Command.ReadConsole)
 runCommand agentId command harnessState = do
-  writeConsoleLn $ "Command not supported: " <> from (show command)
+  writeConsoleLn System $ "Command not supported: " <> from (show command)
   runCommand agentId Command.ReadConsole harnessState
 
 main :: IO ()
 main = do
   let config = Config 0.7 "http://127.0.0.1:8080/v1/chat/completions"
   runEff . runAsk config . runAgent . runConsole  $ do
-    writeConsoleLn $ "Config:" <> pretty config
-    writeConsoleLn "Welcome. How may I help you?"
+    writeConsoleLn System $ pretty config
     run (AgentId 0) Command.ReadConsole $ mkHarnessState config

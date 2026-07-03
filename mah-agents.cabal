@@ -63,16 +63,18 @@ library
                     , Mah.Agents.Data.AgentId
                     , Mah.Agents.Data.AgentInput
                     , Mah.Agents.Data.AgentOutput
-                    , Mah.Agents.Data.AgentResolution
-                    , Mah.Agents.Data.AgentTask
-                    , Mah.Agents.Data.AgentThought
-                    , Mah.Agents.Data.AgentTool
                     , Mah.Agents.Data.Command
                     , Mah.Agents.Data.Config
                     , Mah.Agents.Data.Event
+                    , Mah.Agents.Data.FinishReason
                     , Mah.Agents.Data.HarnessState
                     , Mah.Agents.Data.Message
+                    , Mah.Agents.Data.Resolution
+                    , Mah.Agents.Data.Role
+                    , Mah.Agents.Data.Task
                     , Mah.Agents.Data.Temperature
+                    , Mah.Agents.Data.Tool
+                    , Mah.Agents.Data.Thinking
                     , Mah.Agents.Data.UserInput
                     , Mah.Agents.Effect.Agent
                     , Mah.Agents.Effect.Console
@@ -83,6 +85,7 @@ library
 
     default-extensions: AllowAmbiguousTypes
                       , BlockArguments
+                      , DefaultSignatures
                       , DuplicateRecordFields
                       , NoFieldSelectors
                       , OverloadedRecordDot
@@ -90,13 +93,16 @@ library
                       , RecordWildCards
                       , TemplateHaskell
                       , TypeFamilies
+                      , UndecidableInstances
 
     -- LANGUAGE extensions used by modules in this package.
     -- other-extensions:
 
     -- Other library packages from which modules are imported.
     build-depends:    aeson
+                    , aeson-pretty
                     , base
+                    , bytestring
                     , containers
                     , extra
                     , heftia

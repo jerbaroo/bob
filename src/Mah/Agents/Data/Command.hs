@@ -2,7 +2,7 @@ module Mah.Agents.Data.Command where
 
 import Data.Text (Text)
 import Mah.Agents.Pretty (Pretty(..))
-import Mah.Agents.Data.AgentTool (AgentTool, AgentToolArgs)
+import Mah.Agents.Data.Tool (Tool, ToolArgs)
 import Mah.Agents.Data.Event (IsEvent(..))
 import Mah.Agents.Data.UserInput (UserInput)
 import Witch (from)
@@ -11,7 +11,7 @@ import Witch (from)
 -- TODO make this a type class
 data Command
   = CallAgent UserInput
-  | RunTool AgentTool AgentToolArgs
+  | RunTool Tool ToolArgs
   | ReadConsole
   | WriteConsole Text
   deriving Show
