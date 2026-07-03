@@ -1,6 +1,6 @@
 module Mah.Agents where
 
-import Control.Monad (forM_)
+import Control.Monad (forM, forM_)
 import Control.Monad.Hefty (Eff, (:>), runEff)
 import Data.Aeson qualified as Aeson
 import Data.Effect.Reader (Ask, asks, runAsk)
@@ -8,18 +8,22 @@ import Data.Effect.State (State, evalStateIORef, modify)
 import Data.Map qualified as Map
 import Prelude hiding (appendFile, readFile)
 import Mah.Agents.Command (Command(..), Harness, IsCommand(..))
-import Mah.Agents.Command.CallAgent (CallAgent(..))
+import Mah.Agents.Command.CallAgent qualified as CallAgent
 import Mah.Agents.Command.ReadConsole (ReadConsole(..))
 import Mah.Agents.Data.AgentId (AgentId(..))
+import Mah.Agents.Data.AgentOutput (AgentOutput(..))
 import Mah.Agents.Data.Config (Config(..))
+import Mah.Agents.Data.ToolResult (ToolResult(..))
 import Mah.Agents.Data.Event (Event, IsEvent(..))
 import Mah.Agents.Data.HarnessState (HarnessState(..), mkHarnessState)
 import Mah.Agents.Data.Level (Level(..))
 import Mah.Agents.Data.Role (Role(..))
+import Mah.Agents.Data.UserInput (UserInput)
 import Mah.Agents.Effect.Agent (runAgent)
 import Mah.Agents.Effect.Console (Console, runConsole, writeSection)
 import Mah.Agents.Effect.File (File, appendFile, runFile)
 import Mah.Agents.Pretty (Pretty(..))
+import Mah.Agents.Tool (runToolForModel, toolName')
 import Safe (lastMay)
 import Witch (from)
 
@@ -46,9 +50,26 @@ recordEvents agentId newEvents = do
 run :: Harness es => AgentId -> Eff es ()
 run agentId = do
   userInput <- step ReadConsole
-  step $ CallAgent userInput
+  agentOutput <- step $ CallAgent.UserCall userInput
+  drainTools userInput agentOutput
   run agentId
  where
+  -- | Run the tools the model requested, record their outputs as events, and
+  -- feed the results back to the model, repeating until it stops requesting
+  -- tools. The original user input is kept unchanged for the whole drain.
+  drainTools :: Harness es => UserInput -> AgentOutput -> Eff es ()
+  drainTools userInput output = case output.toolRequests of
+    []    -> pure ()
+    tools -> do
+      outcomes <- forM tools \tool -> do
+        toolOutput <- runToolForModel tool
+        writeSection System Info $ "Output of tool " <> toolName' tool <> ": " <> toolOutput
+        pure $ ToolResult tool toolOutput
+      recordEvents agentId $ from <$> outcomes
+      output' <- step $ CallAgent.ToolResults userInput outcomes
+      drainTools userInput output'
+
+  -- | Run a command, record the events, and return the command result.
   step :: (Aeson.ToJSON c, Harness es, IsCommand c, IsEvent c, Pretty c) => c -> Eff es (Result c)
   step command = do
     (result, events) <- runCommand agentId command

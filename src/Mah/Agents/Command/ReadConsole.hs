@@ -21,5 +21,4 @@ instance Aeson.ToJSON ReadConsole where
 instance IsEvent ReadConsole where
   eventName _ = "ReadConsole"
 
-instance Pretty ReadConsole where
-  pretty ReadConsole = "Read user input"
+instance Pretty ReadConsole

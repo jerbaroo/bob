@@ -1,7 +1,7 @@
 module Mah.Agents.Data.AgentOutput where
 
 import Control.Monad (unless)
-import Data.Aeson ((.:))
+import Data.Aeson ((.:), (.:?), (.!=))
 import Data.Aeson qualified as Aeson
 import Data.Text (Text)
 import Mah.Agents.Data.Event (IsEvent (..))
@@ -12,6 +12,8 @@ import Mah.Agents.Data.Role (Role(..))
 import Mah.Agents.Data.Task (Task)
 import Mah.Agents.Data.Thinking (Thinking(..))
 import Mah.Agents.Pretty (Pretty(..))
+import Mah.Agents.Tool (Tool)
+import Mah.Agents.Tool.Registry (parseToolRequest)
 import Witch (From(..))
 import System.IO.Unsafe (unsafePerformIO)
 
@@ -22,6 +24,7 @@ data AgentOutput = AgentOutput
   , resolution :: Resolution
   , tasks :: [Task]
   , thinking :: Maybe Thinking
+  , toolRequests :: [Tool]
   } deriving Show
 
 instance Aeson.FromJSON AgentOutput where
@@ -70,13 +73,21 @@ instance Pretty AgentOutput where
 data OutputContent = OutputContent
   { resolution :: Resolution
   , tasks      :: [Task]
-  } deriving Show
+  , toolRequests :: [Tool]
+  }
 
 instance Aeson.FromJSON OutputContent where
   parseJSON = Aeson.withObject "OutputContent" \o -> do
-    resolution <- o .: "message"
-    tasks      <- o .: "remaining_tasks"
+    resolution   <- o .: "message"
+    tasks        <- o .: "remaining_tasks"
+    toolCalls    <- o .:? "tool_calls" .!= []
+    toolRequests <- traverse parseToolCall toolCalls
     pure OutputContent{..}
+   where
+    parseToolCall = Aeson.withObject "tool_call" \c -> do
+      name <- c .: "name"
+      args <- c .:? "arguments" .!= Aeson.Object mempty
+      parseToolRequest name args
 
 -- | Separate type for pretty printing info-level information.
 data AgentOutputInfo = AgentOutputInfo
