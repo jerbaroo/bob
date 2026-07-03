@@ -5,7 +5,10 @@ import Data.Effect.Reader (Ask, ask)
 import Mah.Agents.Data.AgentInput (AgentInput)
 import Mah.Agents.Data.AgentOutput (AgentOutput(..))
 import Mah.Agents.Data.Config (Config(..))
-import Network.HTTP.Request (post, Response(body))
+import Network.HTTP.Request (Response(body))
+import Network.HTTP.Client (newManager, managerResponseTimeout, responseTimeoutMicro)
+import Network.HTTP.Client.TLS (tlsManagerSettings)
+import Network.HTTP.Request (Request(..), Method(POST), sendWith)
 import Witch (from)
 
 data Agent :: Effect where
@@ -16,5 +19,17 @@ runAgent :: (Ask Config :> es, Emb IO :> es) => Eff (Agent : es) ~> Eff es
 runAgent = interpret \case
   CallAgent agentInput -> do
     config <- ask
-    response <- liftIO $ post (from config.url) agentInput
+    response <- liftIO $ do
+      -- TODO: connection re-use.
+      manager <- newManager $ tlsManagerSettings
+        { managerResponseTimeout =
+            responseTimeoutMicro $ config.timeoutSeconds * 1_000_000
+        }
+      let request = Request
+            { method = POST
+            , url = from config.url
+            , headers = []
+            , body = Just agentInput
+            }
+      sendWith manager request
     pure response.body

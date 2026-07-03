@@ -1,7 +1,6 @@
 module Mah.Agents.Data.Config where
 
 import Data.Text (Text)
-import Data.Text qualified as Text
 import Mah.Agents.Data.Level (Level)
 import Mah.Agents.Data.Temperature (Temperature)
 import Mah.Agents.Pretty (Pretty(..))
@@ -9,17 +8,18 @@ import Mah.Agents.Pretty (Pretty(..))
 data Config = Config
   { level :: Level
   , model :: Text
+  , session :: Text
   , temperature :: Temperature
+  , timeoutSeconds :: Int
   , url :: Text
   }
 
 instance Pretty Config where
-  pretty Config{..} =
-    let formatItem (k, v) = "- " <> k <> ": " <> v
-        items =
-          [ ("log_level", pretty level)
-          , ("model", model)
-          , ("temperature", pretty temperature)
-          , ("url", url)
-          ]
-    in  "Configuration:\n" <> Text.intercalate "\n" (formatItem <$> items)
+  pretty Config{..} = "Configuration:\n" <> pretty
+    [ ("log_level" :: Text, pretty level)
+    , ("model_name", model)
+    , ("model_temperature", pretty temperature)
+    , ("model_url", url)
+    , ("session_path", session)
+    , ("timeout_seconds", pretty timeoutSeconds)
+    ]

@@ -1,6 +1,7 @@
 module Mah.Agents.Data.FinishReason where
 
 import Data.Aeson qualified as Aeson
+import Mah.Agents.Pretty (Pretty(..))
 import Witch (from)
 
 data FinishReason = Stop
@@ -13,3 +14,6 @@ instance Aeson.FromJSON FinishReason where
 
 instance Aeson.ToJSON FinishReason where
   toJSON Stop = "stop"
+
+instance Pretty FinishReason where
+  pretty Stop = "stop"

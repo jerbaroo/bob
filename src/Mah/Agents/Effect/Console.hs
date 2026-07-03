@@ -1,11 +1,13 @@
 module Mah.Agents.Effect.Console where
 
-import Control.Monad (when)
+import Control.Monad (unless, when)
 import Control.Monad.Hefty (Effect, Eff, Emb, makeEffectF, (:>), type (~>), interpret, liftIO)
 import Data.Effect.Reader (Ask, asks)
+import Data.Effect.State (State, gets, modify)
 import Data.Text (Text)
 import Data.Text qualified as Text
 import Mah.Agents.Data.Config (Config(..))
+import Mah.Agents.Data.HarnessState (HarnessState(..))
 import Mah.Agents.Data.Level (Level(..))
 import Mah.Agents.Data.Role (Role(..))
 import Mah.Agents.Data.UserInput (UserInput(..))
@@ -29,18 +31,27 @@ runConsole = interpret \case
 
 -- * Wrappers.
 
-readUserInput :: (Console :> es) => Eff es UserInput
+readUserInput :: (Console :> es, State HarnessState :> es) => Eff es UserInput
 readUserInput = do
   writeSeparator User
+  modify $ \s -> s { loggingRole = Just User }
   writeConsole "> "
   readConsole
 
-writeSection :: (Ask Config :> es, Console :> es) => Level -> Role -> Text -> Eff es ()
-writeSection level role message = do
-  level' <- asks (.level)
-  when (level' >= level) do
-    writeSeparator role
-    writeConsole $ Text.stripEnd message <> "\n"
+-- | Note, this is not a thread-safe operation!
+writeSection
+  :: (Ask Config :> es, Console :> es, State HarnessState :> es)
+  => Role -> Level -> Text -> Eff es ()
+writeSection role messageLevel message = do
+  loggingLevel <- asks (.level)
+  previousRole <- gets (.loggingRole)
+  when (loggingLevel >= messageLevel) do
+    let sameRole = Just role == previousRole
+    -- Only print a separator if the role is different.
+    unless sameRole $ writeSeparator role
+    let vSep = if sameRole then "\n" else ""
+    writeConsole $ vSep <> Text.stripEnd message <> "\n"
+    modify $ \s -> s{loggingRole=Just role}
 
 writeSeparator :: (Console :> es) => Role -> Eff es ()
 writeSeparator role =

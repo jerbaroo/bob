@@ -108,7 +108,10 @@ library
                     , extra
                     , heftia
                     , heftia-effects
+                    , http-client
+                    , http-client-tls
                     , request
+                    , safe
                     , text
                     , witch
 

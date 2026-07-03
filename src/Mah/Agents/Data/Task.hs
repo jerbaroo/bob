@@ -3,6 +3,7 @@ module Mah.Agents.Data.Task where
 import Data.Aeson qualified as Aeson
 import Data.String (IsString(..))
 import Data.Text (Text)
+import Mah.Agents.Pretty (Pretty(..))
 import Witch (From(..), via)
 
 newtype Task = Task Text
@@ -12,3 +13,6 @@ instance IsString Task where
   fromString = via @Text
 
 instance From Task Text
+
+instance Pretty Task where
+  pretty (Task text) = text

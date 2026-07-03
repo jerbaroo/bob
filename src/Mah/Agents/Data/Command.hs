@@ -8,7 +8,7 @@ import Mah.Agents.Data.UserInput (UserInput)
 import Witch (from)
 
 -- | A side-effect the harness needs to perform.
--- TODO make this a type class
+-- TODO make this a type class?
 data Command
   = CallAgent UserInput
   | RunTool Tool ToolArgs
@@ -21,5 +21,5 @@ instance IsEvent Command
 instance Pretty Command where
   pretty (CallAgent userInput) = "Calling agent with user input: " <> from userInput
   pretty (RunTool tool args) = "Run tool " <> from (show tool) <> from (show args)
-  pretty ReadConsole = "Read from console"
+  pretty ReadConsole = "Read user input console"
   pretty (WriteConsole text) = "Write to console: " <> text

@@ -3,6 +3,7 @@ module Mah.Agents.Data.Resolution where
 import Data.Aeson qualified as Aeson
 import Data.String (IsString(..))
 import Data.Text (Text)
+import Mah.Agents.Pretty (Pretty(..))
 import Witch (From(..), via)
 
 newtype Resolution = Resolution Text
@@ -13,3 +14,6 @@ instance From String Resolution where
 
 instance IsString Resolution where
   fromString = from
+
+instance Pretty Resolution where
+  pretty (Resolution text) = text
