@@ -43,9 +43,9 @@ writeSection
   :: (Ask Config :> es, Console :> es, State HarnessState :> es)
   => Role -> Level -> Text -> Eff es ()
 writeSection role messageLevel message = do
-  loggingLevel <- asks (.level)
+  logLevel <- asks (.logLevel)
   previousRole <- gets (.loggingRole)
-  when (loggingLevel >= messageLevel) do
+  when (logLevel >= messageLevel) do
     let sameRole = Just role == previousRole
     -- Only print a separator if the role is different.
     unless sameRole $ writeSeparator role

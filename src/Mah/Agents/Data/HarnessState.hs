@@ -17,13 +17,13 @@ data HarnessState = HarnessState
   , loggingRole :: Maybe Role
   , tasks :: Map AgentId [Task]
   -- ^ The current tasks per-agent.
-  , temperature :: Temperature
+  , modelTemperature :: Temperature
   }
 
 mkHarnessState :: Config -> HarnessState
 mkHarnessState Config{..} = HarnessState
   { events = Map.empty
   , loggingRole = Nothing
+  , modelTemperature
   , tasks = Map.empty
-  , temperature
   }

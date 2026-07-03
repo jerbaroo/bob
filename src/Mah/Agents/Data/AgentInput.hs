@@ -11,7 +11,7 @@ import Mah.Agents.Data.Message (Message(..))
 import Mah.Agents.Data.Role (Role(..))
 import Mah.Agents.Data.Temperature (Temperature(..))
 import Mah.Agents.Data.UserInput (UserInput(..))
-import Mah.Agents.Pretty (pretty)
+import Mah.Agents.Pretty (Pretty(..))
 import Witch (from, tryInto)
 
 -- | Input available to an agent.
@@ -19,10 +19,11 @@ data AgentInput = AgentInput
   { events :: [Event]
   -- ^ History of events.
   --   May be a compressed version of the full history.
-  , model :: Text
-  , tasks :: [Task]
+  , modelName :: Text
+  , modelTemperature :: Temperature
+  , modelSoul :: Maybe Text
+  , modelTasks :: [Task]
   -- ^ Current tasks to complete.
-  , temperature :: Temperature
   , userInput :: UserInput
   }
 
@@ -30,9 +31,9 @@ instance Aeson.ToJSON AgentInput where
   toJSON AgentInput{..} =
     Aeson.object
       [ ("messages", Aeson.toJSON messages)
-      , ("model", Aeson.toJSON model)
+      , ("model", Aeson.toJSON modelName)
       , ("response_format", Aeson.object [("type", "json_object")])
-      , ("temperature", Aeson.toJSON temperature)
+      , ("temperature", Aeson.toJSON modelTemperature)
       ]
    where
     eventMessages :: [Message]
@@ -43,7 +44,7 @@ instance Aeson.ToJSON AgentInput where
 
     systemMessage :: Message
     systemMessage =
-      let personaStr = "You are an intelligent assistant responsible for tracking tasks and conversing with the user. Be helpful, clear, and concise. The task list is your working memory: use it to keep structure about what you are doing and plan to do."
+      let personaStr = "You are an intelligent assistant responsible for tracking tasks and conversing with the user. The task list is your working memory: use it to keep structure about what you are doing and plan to do."
           tasksStr [] = "You currently have no pending tasks."
           tasksStr tasks' =
                "The following tasks are currently pending. Consider the user's input and decide which remain:\n"
@@ -69,13 +70,16 @@ instance Aeson.ToJSON AgentInput where
             , "- Both \"remaining_tasks\" and \"message\" keys are required."
             , "- Markdown IS allowed inside the \"message\" string value (e.g. you may use code fences, lists, or emphasis within your reply); just ensure it is properly JSON-escaped as a string."
             ]
-          content = Text.intercalate "\n\n" $
-            [ personaStr
-            , tasksStr tasks
-            , responseFormatStr
+          content = Text.intercalate "\n\n" $ catMaybes
+            [ Just personaStr
+            , modelSoul
+            , Just $ tasksStr modelTasks
+            , Just responseFormatStr
             ]
       in  Message {role=System, thinking=Nothing, ..}
 
     userMessage :: Message
     userMessage =
       Message { content=from userInput, role=User, thinking=Nothing }
+
+instance Pretty AgentInput

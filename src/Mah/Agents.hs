@@ -8,7 +8,7 @@ import Data.Effect.Reader (Ask, ask, runAsk)
 import Data.Effect.State (State, evalStateIORef, get, modify)
 import Data.Map qualified as Map
 import Data.Maybe (fromMaybe)
-import Prelude hiding (read)
+import Prelude hiding (read, readFile)
 import Mah.Agents.Data.AgentId (AgentId(..))
 import Mah.Agents.Data.AgentInput (AgentInput(..))
 import Mah.Agents.Data.AgentOutput (AgentOutput(..), AgentOutputInfo, AgentOutputMeta)
@@ -22,20 +22,22 @@ import Mah.Agents.Data.UserInput (UserInput(..))
 import Mah.Agents.Data.Role (Role(..))
 import Mah.Agents.Effect.Agent (Agent(..), callAgent, runAgent)
 import Mah.Agents.Effect.Console (Console, readUserInput, runConsole, writeSection)
+import Mah.Agents.Effect.File (File, readFile, runFile)
 import Mah.Agents.Pretty (Pretty(..))
 import Safe (lastMay)
 import Witch (from, into)
 
 -- | Input to an agent derived from the harness state.
 mkAgentInput
-  :: (Ask Config :> es, State HarnessState :> es)
+  :: (Ask Config :> es, File :> es, State HarnessState :> es)
   => AgentId -> UserInput -> Eff es AgentInput
 mkAgentInput agentId userInput = do
-  Config{model} <- ask
+  Config{modelName, soulPath} <- ask
   HarnessState{..} <- get
+  modelSoul <- maybe (pure Nothing) readFile soulPath
   pure AgentInput
     { events = fromMaybe [] $ Map.lookup agentId events
-    , tasks = fromMaybe [] $ Map.lookup agentId tasks
+    , modelTasks = fromMaybe [] $ Map.lookup agentId tasks
     , ..
     }
 
@@ -56,7 +58,7 @@ recordEvents agentId newEvents = do
   forM_ newEvents $ writeSection System Meta . ("Recorded event: " <>) . pretty
 
 run
-  :: (Agent :> es, Ask Config :> es, Console :> es, State HarnessState :> es)
+  :: (Agent :> es, Ask Config :> es, Console :> es, File :> es, State HarnessState :> es)
   => AgentId -- ^ The agent in-focus.
   -> Command -- ^ The command to run.
   -> Eff es ()
@@ -69,7 +71,7 @@ run agentId command = do
   run agentId nextCommand
 
 runCommand
-  :: (Agent :> es, Ask Config :> es, Console :> es, State HarnessState :> es)
+  :: (Agent :> es, Ask Config :> es, Console :> es, File :> es, State HarnessState :> es)
   => AgentId -- ^ The agent in-focus.
   -> Command -- ^ The command to run.
   -> Eff es (Event, Command)
@@ -77,7 +79,9 @@ runCommand _agentId Command.ReadConsole =
   (from &&& Command.CallAgent) <$> readUserInput
 
 runCommand agentId (Command.CallAgent userInput) = do
-  agentOutput <- callAgent =<< mkAgentInput agentId userInput
+  agentInput <- mkAgentInput agentId userInput
+  writeSection Assistant Debug $ "Agent input:\n" <> pretty agentInput
+  agentOutput <- callAgent agentInput
   writeSection Assistant Debug $ "Raw model output:\n" <> pretty agentOutput.raw
   writeSection Assistant Meta $ pretty $ into @AgentOutputMeta agentOutput
   whenJust agentOutput.thinking $ writeSection Assistant Thinking . pretty
@@ -91,14 +95,15 @@ runCommand agentId command = do
 main :: IO ()
 main = do
   let config = Config
-        { level = Debug
-        , model = "Qwen"
-        , session = "./mah-agents/sessions/default"
-        , temperature = 0.5
+        { engineUrl = "http://127.0.0.1:8080/v1/chat/completions"
+        , logLevel = Debug
+        , modelName = "Qwen"
+        , memoryPath = "./mah-agents/sessions/default"
+        , modelTemperature = 0.5
+        , soulPath = Just "~/.config/mah-agents/SOUL.md"
         , timeoutSeconds = 10 * 60 -- 10 minutes.
-        , url = "http://127.0.0.1:8080/v1/chat/completions"
         }
   let initialState = mkHarnessState config
-  runEff . runAsk config . runAgent . runConsole . evalStateIORef initialState $ do
+  runEff . runAsk config . runAgent . runConsole . runFile . evalStateIORef initialState $ do
     writeSection System Info $ "Type /help for assistance.\n\n" <> pretty config
     run (AgentId 0) Command.ReadConsole

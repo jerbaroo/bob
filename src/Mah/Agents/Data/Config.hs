@@ -1,25 +1,30 @@
 module Mah.Agents.Data.Config where
 
+import Data.Maybe (catMaybes)
 import Data.Text (Text)
 import Mah.Agents.Data.Level (Level)
 import Mah.Agents.Data.Temperature (Temperature)
 import Mah.Agents.Pretty (Pretty(..))
 
 data Config = Config
-  { level :: Level
-  , model :: Text
-  , session :: Text
-  , temperature :: Temperature
+  { engineUrl :: Text
+  , logLevel :: Level
+  , modelName :: Text
+  , memoryPath :: Text
+  , modelTemperature :: Temperature
+  , soulPath :: Maybe Text
   , timeoutSeconds :: Int
-  , url :: Text
   }
 
 instance Pretty Config where
-  pretty Config{..} = "Configuration:\n" <> pretty
-    [ ("log_level" :: Text, pretty level)
-    , ("model_name", model)
-    , ("model_temperature", pretty temperature)
-    , ("model_url", url)
-    , ("session_path", session)
-    , ("timeout_seconds", pretty timeoutSeconds)
-    ]
+  pretty Config{..} =
+    let prettyConfig = pretty $ catMaybes
+          [ Just ("engine_url", engineUrl)
+          , Just ("log_level" :: Text, pretty logLevel)
+          , Just ("model_name", modelName)
+          , Just ("memory_path", memoryPath)
+          , Just ("model_temperature", pretty modelTemperature)
+          , ("soul_path",) <$> soulPath
+          , Just ("timeout_seconds", pretty timeoutSeconds)
+          ]
+    in "Configuration:\n" <> prettyConfig

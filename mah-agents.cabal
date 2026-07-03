@@ -79,6 +79,7 @@ library
                     , Mah.Agents.Data.UserInput
                     , Mah.Agents.Effect.Agent
                     , Mah.Agents.Effect.Console
+                    , Mah.Agents.Effect.File
                     , Mah.Agents.Pretty
 
     -- Modules included in this library but not exported.
@@ -105,7 +106,9 @@ library
                     , base
                     , bytestring
                     , containers
+                    , directory
                     , extra
+                    , filepath
                     , heftia
                     , heftia-effects
                     , http-client

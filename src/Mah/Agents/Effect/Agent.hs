@@ -27,7 +27,7 @@ runAgent = interpret \case
         }
       let request = Request
             { method = POST
-            , url = from config.url
+            , url = from config.engineUrl
             , headers = []
             , body = Just agentInput
             }
