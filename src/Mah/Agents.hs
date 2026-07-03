@@ -18,7 +18,7 @@ import Mah.Agents.Data.HarnessState (HarnessState(..), mkHarnessState)
 import Mah.Agents.Data.UserInput (UserInput(..))
 import Mah.Agents.Data.Role (Role(..))
 import Mah.Agents.Effect.Agent (Agent(..), callAgent, runAgent)
-import Mah.Agents.Effect.Console (Console, readUserInput, runConsole, writeConsoleLn)
+import Mah.Agents.Effect.Console (Console, readUserInput, runConsole, writeSection)
 import Mah.Agents.Pretty (Pretty(..))
 import Witch (from)
 
@@ -71,15 +71,15 @@ runCommand _agentId Command.ReadConsole _ =
     (from userInput, Command.CallAgent userInput)
 runCommand agentId (Command.CallAgent userInput) harnessState = do
   agentOutput <- callAgent (mkAgentInput agentId userInput harnessState)
-  whenJust agentOutput.thinking $ writeConsoleLn Assistant . from . pretty
+  whenJust agentOutput.thinking $ writeSection Assistant . from . pretty
   pure $ (from agentOutput, Command.ReadConsole)
 runCommand agentId command harnessState = do
-  writeConsoleLn System $ "Command not supported: " <> from (show command)
+  writeSection System $ "Command not supported: " <> from (show command)
   runCommand agentId Command.ReadConsole harnessState
 
 main :: IO ()
 main = do
   let config = Config 0.7 "http://127.0.0.1:8080/v1/chat/completions"
   runEff . runAsk config . runAgent . runConsole  $ do
-    writeConsoleLn System $ pretty config
+    writeSection System $ pretty config
     run (AgentId 0) Command.ReadConsole $ mkHarnessState config

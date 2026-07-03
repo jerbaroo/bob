@@ -42,19 +42,36 @@ instance Aeson.ToJSON AgentInput where
 
     systemMessage :: Message
     systemMessage =
-      let tasksStr [] = Nothing
-          tasksStr tasks' = Just $
-               "Your current tasks are:"
+      let personaStr = "You are an intelligent assistant responsible for tracking tasks and conversing with the user. Be helpful, clear, and concise. The task list is your working memory: use it to keep structure about what you are doing and plan to do."
+          tasksStr [] = "You currently have no pending tasks."
+          tasksStr tasks' =
+               "The following tasks are currently pending. Consider the user's input and decide which remain:\n"
             <> Text.intercalate "\n" (("- " <>) . from <$> tasks')
-          responseFormatStr =
-               "CRITICAL INSTRUCTION: You must respond with a raw JSON object matching exactly this schema:\n"
-            <> "{\n"
-            <> "  \"remaining_tasks\": [\"A list of strings representing the tasks you still need to do\"],\n"
-            <> "  \"message\": \"Your actual conversational reply to the user\"\n"
-            <> "}"
-          content = Text.intercalate "\n\n" $ catMaybes
-            [ tasksStr tasks
-            , Just responseFormatStr
+          responseFormatStr = Text.unlines
+            [ "### CRITICAL INSTRUCTION: OUTPUT FORMAT"
+            , "You must respond with a single, raw JSON object and nothing else."
+            , "The object has exactly two keys:"
+            , "- \"remaining_tasks\": an array of strings representing your up-to-date task list."
+            , "  Maintain it actively: ADD new tasks (whether requested by the user or that you"
+            , "  identify as needed to make progress), KEEP tasks that are still pending, and REMOVE"
+            , "  tasks that are now complete or no longer relevant. Use an empty array [] when nothing remains."
+            , "- \"message\": a string containing your conversational reply to the user."
+            , ""
+            , "Example of a valid response:"
+            , "{\"remaining_tasks\": [\"Buy milk\", \"Call the dentist\"], \"message\": \"I've added those two tasks for you.\"}"
+            , ""
+            , "Strict rules for your response:"
+            , "- Output ONLY the JSON object. Do not include any text before or after it."
+            , "- Do NOT wrap the JSON object itself in Markdown code fences (no ``` or ```json around the object)."
+            , "- Do NOT include comments or explanations outside the JSON object."
+            , "- The first character of your response must be '{' and the last character must be '}'."
+            , "- Both \"remaining_tasks\" and \"message\" keys are required."
+            , "- Markdown IS allowed inside the \"message\" string value (e.g. you may use code fences, lists, or emphasis within your reply); just ensure it is properly JSON-escaped as a string."
+            ]
+          content = Text.intercalate "\n\n" $
+            [ personaStr
+            , tasksStr tasks
+            , responseFormatStr
             ]
       in  Message {role=System, thinking=Nothing, ..}
 

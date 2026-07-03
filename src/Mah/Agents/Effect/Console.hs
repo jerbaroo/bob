@@ -25,17 +25,14 @@ runConsole = interpret \case
 
 -- * Wrappers.
 
-separator :: Text
-separator = "------------------------------------------------------------------"
-
 readUserInput :: (Console :> es) => Eff es UserInput
 readUserInput = do
   writeSeparator User
   writeConsole "> "
   readConsole
 
-writeConsoleLn :: (Console :> es) => Role -> Text -> Eff es ()
-writeConsoleLn role message = do
+writeSection :: (Console :> es) => Role -> Text -> Eff es ()
+writeSection role message = do
   writeSeparator role
   writeConsole $ Text.stripEnd message <> "\n"
 
@@ -46,6 +43,7 @@ writeSeparator role =
         System -> "System"
         User -> "You"
       roleLen = Text.length roleText
+      separator = "------------------------------------------------------------"
   in  writeConsole $ Pretty.colour Pretty.cyanDim
         $  "\n- "
         <> roleText
