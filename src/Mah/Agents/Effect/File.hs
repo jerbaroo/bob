@@ -2,13 +2,14 @@ module Mah.Agents.Effect.File where
 
 import Control.Monad.Hefty (Effect, Eff, Emb, makeEffectF, (:>), type (~>), interpret, liftIO)
 import Data.Text (Text)
-import System.Directory (getHomeDirectory)
-import System.FilePath ((</>))
+import System.Directory (createDirectoryIfMissing, getHomeDirectory)
+import System.FilePath (takeDirectory, (</>))
 import System.IO qualified as IO
 import Witch (from)
 
 data File :: Effect where
-  ReadFile :: Text -> File f (Maybe Text)
+  ReadFile   :: Text -> File f (Maybe Text)
+  AppendFile :: Text -> Text -> File f ()
 makeEffectF ''File
 
 runFile :: (Emb IO :> es) => Eff (File : es) ~> Eff es
@@ -16,6 +17,10 @@ runFile = interpret \case
   ReadFile filePath -> liftIO do
     expandedPath <- expandTilde $ from filePath
     Just . from <$> IO.readFile (from expandedPath)
+  AppendFile filePath content -> liftIO do
+    expandedPath <- expandTilde $ from filePath
+    createDirectoryIfMissing True $ takeDirectory expandedPath
+    IO.appendFile expandedPath $ from content
 
 -- | Expands a leading tilde (~) in a filepath to the user's home directory.
 expandTilde :: FilePath -> IO FilePath

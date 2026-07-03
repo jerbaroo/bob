@@ -1,6 +1,7 @@
 module Mah.Agents.Command where
 
 import Control.Monad.Hefty (Eff, (:>))
+import Data.Aeson qualified as Aeson
 import Data.Effect.Reader (Ask)
 import Data.Effect.State (State)
 import Mah.Agents.Data.AgentId (AgentId)
@@ -23,12 +24,16 @@ type Harness es =
   )
 
 -- | An existential wrapper over any concrete command.
-data Command = forall c. (IsCommand c, IsEvent c, Pretty c) => Command c
+data Command = forall c. (Aeson.ToJSON c, IsCommand c, IsEvent c, Pretty c) => Command c
 
-instance (IsCommand c, IsEvent c, Pretty c) => From c Command where
+instance (Aeson.ToJSON c, IsCommand c, IsEvent c, Pretty c) => From c Command where
   from = Command
 
+instance Aeson.ToJSON Command where
+  toJSON (Command c) = Aeson.toJSON c
+
 instance IsEvent Command where
+  eventName (Command c) = "Command:" <> eventName c
   eventTasks (Command c) = eventTasks c
   eventToMessage (Command c) = eventToMessage c
 

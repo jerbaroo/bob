@@ -2,6 +2,7 @@ module Mah.Agents.Command.CallAgent where
 
 import Control.Monad.Extra (whenJust)
 import Control.Monad.Hefty (Eff, (:>))
+import Data.Aeson qualified as Aeson
 import Data.Effect.Reader (Ask, ask)
 import Data.Effect.State (State, get)
 import Data.Map qualified as Map
@@ -12,7 +13,7 @@ import Mah.Agents.Data.AgentId (AgentId)
 import Mah.Agents.Data.AgentInput (AgentInput(..))
 import Mah.Agents.Data.AgentOutput (AgentOutput(..), AgentOutputInfo, AgentOutputMeta)
 import Mah.Agents.Data.Config (Config(..))
-import Mah.Agents.Data.Event (Event, IsEvent)
+import Mah.Agents.Data.Event (Event, IsEvent(..))
 import Mah.Agents.Data.HarnessState (HarnessState(..))
 import Mah.Agents.Data.Level (Level(..))
 import Mah.Agents.Data.Role (Role(..))
@@ -37,7 +38,11 @@ instance IsCommand CallAgent where
     writeSection Assistant Info $ pretty $ into @AgentOutputInfo agentOutput
     pure ((), [from agentOutput :: Event])
 
-instance IsEvent CallAgent
+instance Aeson.ToJSON CallAgent where
+  toJSON (CallAgent userInput) = Aeson.object [("user_input", Aeson.toJSON userInput)]
+
+instance IsEvent CallAgent where
+  eventName _ = "CallAgent"
 
 instance Pretty CallAgent where
   pretty (CallAgent userInput) = "Call agent with " <> pretty userInput

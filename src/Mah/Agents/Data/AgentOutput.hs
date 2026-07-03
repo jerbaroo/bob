@@ -54,7 +54,11 @@ instance Aeson.FromJSON AgentOutput where
       , ..
       }
 
+instance Aeson.ToJSON AgentOutput where
+  toJSON AgentOutput{raw} = Aeson.Object raw
+
 instance IsEvent AgentOutput where
+  eventName _ = "AgentOutput"
   eventTasks AgentOutput{..} = Just tasks
 
 instance Pretty AgentOutput where

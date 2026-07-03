@@ -2,25 +2,32 @@
 
 module Mah.Agents.Data.Event where
 
+import Data.Aeson qualified as Aeson
+import Data.Text (Text)
 import Mah.Agents.Data.Task (Task)
 import Mah.Agents.Data.Message (Message)
 import Mah.Agents.Pretty (Pretty(..))
 import Witch (From(..), TryFrom(..), maybeTryFrom)
 
-data Event = forall e. (IsEvent e, Pretty e) => Event e
+data Event = forall e. (Aeson.ToJSON e, IsEvent e, Pretty e) => Event e
 
-instance (IsEvent e, Pretty e) => From e Event where
+instance (Aeson.ToJSON e, IsEvent e, Pretty e) => From e Event where
   from = Event
 
 instance IsEvent Event where
+  eventName (Event e) = eventName e
   eventTasks (Event e) = eventTasks e
   eventToMessage (Event e) = eventToMessage e
 
-instance Pretty Event where
-  pretty (Event e) = pretty e
+instance Aeson.ToJSON Event where
+  toJSON (Event e) = Aeson.object
+    [ ("name", Aeson.toJSON $ eventName e)
+    , ("value", Aeson.toJSON e)
+    ]
 
 -- | Something that has happened.
 class IsEvent e where
+  eventName :: e -> Text -- TODO use Typeable?
   eventTasks :: e -> Maybe [Task]
   eventTasks _ = Nothing
   eventToMessage :: e -> Maybe Message
