@@ -60,10 +60,12 @@ library
 
     -- Modules exported by the library.
     exposed-modules:  Mah.Agents
+                    , Mah.Agents.Command
+                    , Mah.Agents.Command.CallAgent
+                    , Mah.Agents.Command.ReadConsole
                     , Mah.Agents.Data.AgentId
                     , Mah.Agents.Data.AgentInput
                     , Mah.Agents.Data.AgentOutput
-                    , Mah.Agents.Data.Command
                     , Mah.Agents.Data.Config
                     , Mah.Agents.Data.Event
                     , Mah.Agents.Data.FinishReason

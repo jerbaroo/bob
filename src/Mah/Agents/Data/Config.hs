@@ -9,8 +9,8 @@ import Mah.Agents.Pretty (Pretty(..))
 data Config = Config
   { engineUrl :: Text
   , logLevel :: Level
-  , modelName :: Text
   , memoryPath :: Text
+  , modelName :: Text
   , modelTemperature :: Temperature
   , soulPath :: Maybe Text
   , timeoutSeconds :: Int
@@ -21,8 +21,8 @@ instance Pretty Config where
     let prettyConfig = pretty $ catMaybes
           [ Just ("engine_url", engineUrl)
           , Just ("log_level" :: Text, pretty logLevel)
-          , Just ("model_name", modelName)
           , Just ("memory_path", memoryPath)
+          , Just ("model_name", modelName)
           , Just ("model_temperature", pretty modelTemperature)
           , ("soul_path",) <$> soulPath
           , Just ("timeout_seconds", pretty timeoutSeconds)
