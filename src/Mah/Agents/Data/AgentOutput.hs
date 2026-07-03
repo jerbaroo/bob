@@ -10,6 +10,7 @@ import Mah.Agents.Data.Resolution (Resolution)
 import Mah.Agents.Data.Role (Role(..))
 import Mah.Agents.Data.Task (Task)
 import Mah.Agents.Data.Thinking (Thinking(..))
+import Mah.Agents.Pretty (Pretty(..))
 import Witch (from)
 
 -- | The final output from the agent.
@@ -38,6 +39,9 @@ instance Aeson.FromJSON AgentOutput where
 
 instance IsEvent AgentOutput where
   eventTasks AgentOutput{..} = Just tasks
+
+instance Pretty AgentOutput where
+  pretty AgentOutput{} = "AgentOutput{..}" -- Too verbose to print anymore.
 
 -- | The schema we told the LLM to use inside the "content" string.
 data OutputContent = OutputContent

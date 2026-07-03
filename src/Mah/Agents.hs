@@ -57,6 +57,7 @@ run agentId command harnessState = do
   -- Record the command, and the resulting event.
   let nextHarnessState = recordEvent agentId event
         $ recordEvent agentId (from command) harnessState
+  writeSection Meta System $ "Recorded event: " <> pretty event
   -- Run the next command.
   run agentId nextCommand nextHarnessState
 
@@ -79,7 +80,7 @@ runCommand agentId command harnessState = do
 
 main :: IO ()
 main = do
-  let config = Config Thinking "Qwen" 0.5 "http://127.0.0.1:8080/v1/chat/completions"
+  let config = Config Debug "Qwen" 0.5 "http://127.0.0.1:8080/v1/chat/completions"
   runEff . runAsk config . runAgent . runConsole  $ do
     writeSection Info System $ pretty config
     run (AgentId 0) Command.ReadConsole $ mkHarnessState config

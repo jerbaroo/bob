@@ -4,12 +4,20 @@ module Mah.Agents.Data.Event where
 
 import Mah.Agents.Data.Task (Task)
 import Mah.Agents.Data.Message (Message)
+import Mah.Agents.Pretty (Pretty(..))
 import Witch (From(..), TryFrom(..), maybeTryFrom)
 
-data Event = forall e. IsEvent e => Event e
+data Event = forall e. (IsEvent e, Pretty e) => Event e
+
+instance (IsEvent e, Pretty e) => From e Event where
+  from = Event
 
 instance IsEvent Event where
   eventTasks (Event e) = eventTasks e
+  eventToMessage (Event e) = eventToMessage e
+
+instance Pretty Event where
+  pretty (Event e) = pretty e
 
 -- | Something that has happened.
 class IsEvent e where
@@ -17,9 +25,6 @@ class IsEvent e where
   eventTasks _ = Nothing
   eventToMessage :: e -> Maybe Message
   eventToMessage _ = Nothing
-
-instance IsEvent e => From e Event where
-  from = Event
 
 instance IsEvent e => TryFrom e Message where
   tryFrom = maybeTryFrom eventToMessage
