@@ -77,11 +77,15 @@ library
                     , Mah.Agents.Data.Task
                     , Mah.Agents.Data.Temperature
                     , Mah.Agents.Data.Thinking
+                    , Mah.Agents.Data.ToolName
                     , Mah.Agents.Data.ToolResult
+                    , Mah.Agents.Data.Permission
                     , Mah.Agents.Data.UserInput
                     , Mah.Agents.Effect.Agent
                     , Mah.Agents.Effect.Console
                     , Mah.Agents.Effect.File
+                    , Mah.Agents.Glob
+                    , Mah.Agents.Permissions
                     , Mah.Agents.Pretty
                     , Mah.Agents.Prompt
                     , Mah.Agents.Prompt.Build
@@ -108,7 +112,8 @@ library
     -- other-extensions:
 
     -- Other library packages from which modules are imported.
-    build-depends:    aeson
+    build-depends:    Glob
+                    , aeson
                     , aeson-pretty
                     , base
                     , bytestring

@@ -12,6 +12,7 @@ data Config = Config
   , memoryPath :: Text
   , modelName :: Text
   , modelTemperature :: Temperature
+  , permissionsPath :: Text
   , soulPath :: Maybe Text
   , timeoutSeconds :: Int
   }
@@ -24,6 +25,7 @@ instance Pretty Config where
           , Just ("memory_path", memoryPath)
           , Just ("model_name", modelName)
           , Just ("model_temperature", pretty modelTemperature)
+          , Just ("permissions_path", permissionsPath)
           , ("soul_path",) <$> soulPath
           , Just ("timeout_seconds", pretty timeoutSeconds)
           ]

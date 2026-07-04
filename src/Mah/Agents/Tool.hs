@@ -2,8 +2,11 @@ module Mah.Agents.Tool where
 
 import Control.Monad.Hefty (Eff, (:>))
 import Data.Aeson qualified as Aeson
+import Data.String (IsString)
 import Data.Text (Text)
+import Mah.Agents.Data.ToolName (ToolName)
 import Mah.Agents.Effect.File (File)
+import Witch (From(..))
 
 data Tool
   = forall t
@@ -19,6 +22,8 @@ instance Show Tool where
 -- | Something the agent can ask the harness to do on its behalf.
 class IsTool t where
   type ToolOutput t
+  -- | Decide whether a single permission grant covers this invocation.
+  permissionGranted :: (File :> es) => t -> Text -> Eff es Bool
   -- | Render the tool output for the model.
   renderOutput :: t -> ToolOutput t -> Text
   -- | Run a tool to produce a result.
@@ -26,9 +31,9 @@ class IsTool t where
   -- | Human/model readable description injected into the prompt,
   toolDescription :: Text
   -- | The name the model uses to request this tool.
-  toolName :: Text
+  toolName :: ToolName
 
-toolName' :: Tool -> Text
+toolName' :: Tool -> ToolName
 toolName' (Tool (_ :: t)) = toolName @t
 
 -- | Run a tool and render its output to 'Text'.

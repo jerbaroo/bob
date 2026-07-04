@@ -6,7 +6,9 @@ import Data.Aeson qualified as Aeson
 import Data.Text (Text)
 import Data.Text qualified as Text
 import Prelude hiding (readFile)
-import Mah.Agents.Effect.File (readFile)
+import Mah.Agents.Effect.File (readFile, resolvePath)
+import Mah.Agents.Glob (Glob(..))
+import Mah.Agents.Glob qualified as Glob
 import Mah.Agents.Tool (IsTool(..))
 
 -- | Read one or more files within a directory.
@@ -29,15 +31,21 @@ instance Aeson.ToJSON ReadFiles where
 
 instance IsTool ReadFiles where
   type ToolOutput ReadFiles = [(Text, Maybe Text)]
-  toolDescription = Text.unlines
-    [ "- ReadFiles: read the contents of one or more files within a directory."
-    , "  Arguments: {\"directory\": \"<path>\", \"files\": [\"<name>\", ...]}"
-    , "  Example: {\"name\": \"ReadFiles\", \"arguments\": {\"directory\": \"src\", \"files\": [\"Main.hs\"]}}"
-    ]
-  toolName = "ReadFiles"
+  -- Every file this invocation reads must fall under the granted glob.
+  permissionGranted ReadFiles{..} param = do
+    glob <- Glob <$> resolvePath param
+    and <$> traverse
+      (\f -> Glob.matches glob <$> resolvePath (directory <> "/" <> f))
+      files
   renderOutput _ = Text.intercalate "\n\n" . fmap render
    where
     render (path, Just c)  = "== " <> path <> " ==\n" <> c
     render (path, Nothing) = "== " <> path <> " == (could not read)"
   runTool ReadFiles{..} =
     forM files \f -> (f,) <$> readFile (directory <> "/" <> f)
+  toolDescription = Text.unlines
+    [ "- ReadFiles: read the contents of one or more files within a directory."
+    , "  Arguments: {\"directory\": \"<path>\", \"files\": [\"<name>\", ...]}"
+    , "  Example: {\"name\": \"ReadFiles\", \"arguments\": {\"directory\": \"src\", \"files\": [\"Main.hs\"]}}"
+    ]
+  toolName = "ReadFiles"

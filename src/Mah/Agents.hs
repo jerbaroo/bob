@@ -6,6 +6,7 @@ import Data.Aeson qualified as Aeson
 import Data.Effect.Reader (Ask, asks, runAsk)
 import Data.Effect.State (State, evalStateIORef, modify)
 import Data.Map qualified as Map
+import Data.Text (Text)
 import Prelude hiding (appendFile, readFile)
 import Mah.Agents.Command (Command(..), Harness, IsCommand(..))
 import Mah.Agents.Command.CallAgent qualified as CallAgent
@@ -22,10 +23,11 @@ import Mah.Agents.Data.UserInput (UserInput)
 import Mah.Agents.Effect.Agent (runAgent)
 import Mah.Agents.Effect.Console (Console, runConsole, writeSection)
 import Mah.Agents.Effect.File (File, appendFile, runFile)
+import Mah.Agents.Permissions (checkPermission)
 import Mah.Agents.Pretty (Pretty(..), compact)
 import Mah.Agents.Tool (runToolForModel, toolName')
 import Safe (lastMay)
-import Witch (from)
+import Witch (from, into)
 
 -- | Update the harness state with new events.
 recordEvents
@@ -62,8 +64,9 @@ run agentId = do
     []    -> pure ()
     tools -> do
       outcomes <- forM tools \tool -> do
+        checkPermission tool
         toolOutput <- runToolForModel tool
-        writeSection System Info $ toolName' tool <> " tool output:\n" <> toolOutput
+        writeSection System Info $ into @Text (toolName' tool) <> " tool output:\n" <> toolOutput
         pure $ ToolResult tool toolOutput
       recordEvents agentId $ from <$> outcomes
       output' <- step $ CallAgent.ToolResults userInput outcomes
@@ -84,6 +87,7 @@ main = do
         , memoryPath = "~/.mah-agents/sessions/default"
         , modelName = "Qwen"
         , modelTemperature = 0.5
+        , permissionsPath = "~/.mah-agents/permissions"
         , soulPath = Just "~/.config/mah-agents/SOUL.md"
         , timeoutSeconds = 10 * 60 -- 10 minutes.
         }
