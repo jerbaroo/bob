@@ -9,6 +9,7 @@ import Mah.Agents.Data.UserInput (UserInput)
 import Mah.Agents.UserCommand (IsUserCommand(..))
 import Mah.Agents.UserCommand.AgentCall (AgentCall)
 import Mah.Agents.UserCommand.ConfigShow (ConfigShow)
+import Mah.Agents.UserCommand.PermissionsShow (PermissionsShow)
 
 -- | An existential over a user command type (not a value).
 data SomeUserCommand
@@ -20,6 +21,7 @@ data SomeUserCommand
 knownUserCommands :: [SomeUserCommand]
 knownUserCommands =
   [ SomeUserCommand $ Proxy @ConfigShow
+  , SomeUserCommand $ Proxy @PermissionsShow
   , SomeUserCommand $ Proxy @AgentCall
   ]
 

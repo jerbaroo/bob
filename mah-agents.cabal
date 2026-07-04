@@ -95,6 +95,7 @@ library
                     , Mah.Agents.UserCommand
                     , Mah.Agents.UserCommand.AgentCall
                     , Mah.Agents.UserCommand.ConfigShow
+                    , Mah.Agents.UserCommand.PermissionsShow
                     , Mah.Agents.UserCommand.Registry
 
     -- Modules included in this library but not exported.
