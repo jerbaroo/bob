@@ -3,7 +3,6 @@ module Mah.Agents.Pretty where
 import Data.Aeson qualified as Aeson
 import Data.Aeson.Encode.Pretty qualified as Aeson
 import Data.ByteString qualified as ByteString
-import Data.Char (isDigit)
 import Data.Functor ((<&>))
 import Data.Text (Text)
 import Data.Text qualified as Text
@@ -46,21 +45,12 @@ instance Pretty Int where
 instance Pretty Text where
   pretty = id
 
+-- * ANSI colour codes
+
 type Colour = Text
 
 colour :: Colour -> Text -> Text
 colour c t = c <> t <> reset
-
--- * Helpers
-
-isBullet :: Text -> Bool
-isBullet line = case Text.uncons line of
-  Just (c, rest) ->
-        isDigit c
-    && (Text.isPrefixOf ". " rest || Text.isPrefixOf ".\t" rest)
-  _ -> False
-
--- * ANSI colour codes
 
 grey :: Colour
 grey = "\ESC[90m"

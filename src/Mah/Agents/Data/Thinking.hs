@@ -1,7 +1,7 @@
 module Mah.Agents.Data.Thinking where
 
 import Data.Aeson qualified as Aeson
-import Data.List (intercalate)
+import Data.Char (isDigit)
 import Data.String (IsString(..))
 import Data.Text (Text)
 import Data.Text qualified as Text
@@ -20,40 +20,38 @@ instance From String Thinking where
 instance IsString Thinking where
   fromString = from
 
+-- | Render thoughts as dimmed, lightly markdown-aware text.
 instance Pretty Thinking where
-  pretty thinking =
-    Text.unlines
-    $ intercalate [""] -- Unlines will insert a newline between groups of thoughts.
-    $ fmap applyColour <$> toThoughts thinking
+  pretty = Text.intercalate "\n" . fmap styleLine . Text.lines . Text.strip . into @Text
+   where
+    styleLine :: Text -> Text
+    styleLine line =
+      let (indent, trimmed) = Text.span (== ' ') line
+      in case bulletMarker trimmed of
+           Just (marker, rest) ->
+                indent
+             <> Pretty.colour Pretty.cyanDim marker
+             <> Pretty.colour Pretty.grey rest
+           Nothing -> Pretty.colour (lineColour trimmed) line
+    lineColour trimmed
+      | Text.isPrefixOf "```" trimmed = Pretty.magentaDim
+      | Text.isPrefixOf "#"   trimmed = Pretty.cyanBright
+      | otherwise                     = Pretty.grey
 
--- * Format thoughts
-
-type Thought = Text
-
-applyColour :: Thought -> Thought
-applyColour line' =
-  let line = Text.strip line'
-      colour | Pretty.isBullet line = Pretty.grey
-             | Text.isPrefixOf "```" line = Pretty.magentaDim
-             | otherwise = Pretty.grey
-  in  Pretty.colour colour line'
-
-chunkThoughts :: [Thought] -> [[Thought]]
-chunkThoughts =
-    filter (not . null) -- Remove empty groups of thoughts.
-  . fmap (filter $ not . Text.null) -- Remove empty thoughts.
-  . chunkThoughts'
- where
-  chunkThoughts' :: [Thought] -> [[Thought]]
-  chunkThoughts' [] = []
-  chunkThoughts' (x:xs) =
-    let (chunk, rest) = break (\t -> Text.null t || Pretty.isBullet t) xs
-    in  (x : chunk) : chunkThoughts rest
-
-toThoughts :: Thinking -> [[Thought]]
-toThoughts =
-    chunkThoughts -- Chunk into groups of thoughts.
-  . fmap Text.stripEnd -- Remove trailing whitespace.
-  . Text.lines -- Convert into lines of thought.
-  . Text.strip -- Strip surrounding whitespace.
-  . into @Text
+-- | Split a leading markdown bullet marker ("-", "*", "+", or a numbered
+-- "N." / "N)") followed by a space, from the rest of the line.
+bulletMarker :: Text -> Maybe (Text, Text)
+bulletMarker t
+  -- A "-", "*" or "+", followed by one space.
+  | Just (c, rest) <- Text.uncons t
+    , c `elem` ['-', '*', '+']
+    , Text.isPrefixOf " " rest
+    = Just (Text.singleton c, rest)
+  -- One or more digits, then a "." or ")", followed by one space.
+  | (digits, rest) <- Text.span isDigit t
+    , not (Text.null digits)
+    , Just (x, rest') <- Text.uncons rest
+    , x `elem` ['.', ')']
+    , Text.isPrefixOf " " rest'
+    = Just (digits <> Text.singleton x, rest')
+  | otherwise = Nothing
