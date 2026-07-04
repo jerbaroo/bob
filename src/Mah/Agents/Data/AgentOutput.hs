@@ -30,7 +30,7 @@ data AgentOutput = AgentOutput
 instance Aeson.FromJSON AgentOutput where
   parseJSON = Aeson.withObject "AgentOutput" $ \o' -> do
     let o = unsafePerformIO do
-          putStrLn $ from $ pretty o'
+          putStrLn $ "Parsing AgentOutput from: " <> from (pretty o')
           pure o'
     choice <- o .: "choices" >>= \case
       [choice] -> pure choice

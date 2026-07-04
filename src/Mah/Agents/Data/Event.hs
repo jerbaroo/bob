@@ -27,6 +27,7 @@ instance Aeson.ToJSON Event where
 
 -- | Something that has happened.
 class IsEvent e where
+  -- TODO avoid parameter 'e'.
   eventName :: e -> Text -- TODO use Typeable?
   eventTasks :: e -> Maybe [Task]
   eventTasks _ = Nothing

@@ -22,7 +22,7 @@ import Mah.Agents.Data.UserInput (UserInput)
 import Mah.Agents.Effect.Agent (runAgent)
 import Mah.Agents.Effect.Console (Console, runConsole, writeSection)
 import Mah.Agents.Effect.File (File, appendFile, runFile)
-import Mah.Agents.Pretty (Pretty(..))
+import Mah.Agents.Pretty (Pretty(..), compact)
 import Mah.Agents.Tool (runToolForModel, toolName')
 import Safe (lastMay)
 import Witch (from)
@@ -44,7 +44,7 @@ recordEvents agentId newEvents = do
   memoryPath <- asks (.memoryPath)
   forM_ newEvents $ \event -> do
     writeSection System Meta $ "Recorded event: " <> eventName event
-    appendFile memoryPath $ pretty (Aeson.toJSON event) <> "\n"
+    appendFile memoryPath $ compact event <> "\n"
 
 -- | The main agentic loop.
 run :: Harness es => AgentId -> Eff es ()
@@ -63,7 +63,7 @@ run agentId = do
     tools -> do
       outcomes <- forM tools \tool -> do
         toolOutput <- runToolForModel tool
-        writeSection System Info $ "Output of tool " <> toolName' tool <> ": " <> toolOutput
+        writeSection System Info $ toolName' tool <> " tool output:\n" <> toolOutput
         pure $ ToolResult tool toolOutput
       recordEvents agentId $ from <$> outcomes
       output' <- step $ CallAgent.ToolResults userInput outcomes
