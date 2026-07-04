@@ -1,10 +1,8 @@
 module Mah.Agents.Data.ToolName where
 
-import Control.Monad.Hefty (Eff, (:>))
 import Data.Aeson qualified as Aeson
 import Data.String (IsString)
 import Data.Text (Text)
-import Mah.Agents.Effect.File (File)
 import Witch (From(..), via)
 
 -- | The name the model uses to request a tool.

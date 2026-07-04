@@ -92,6 +92,10 @@ library
                     , Mah.Agents.Tool
                     , Mah.Agents.Tool.ReadFiles
                     , Mah.Agents.Tool.Registry
+                    , Mah.Agents.UserCommand
+                    , Mah.Agents.UserCommand.AgentCall
+                    , Mah.Agents.UserCommand.ConfigShow
+                    , Mah.Agents.UserCommand.Registry
 
     -- Modules included in this library but not exported.
     -- other-modules:

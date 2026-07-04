@@ -2,11 +2,9 @@ module Mah.Agents.Tool where
 
 import Control.Monad.Hefty (Eff, (:>))
 import Data.Aeson qualified as Aeson
-import Data.String (IsString)
 import Data.Text (Text)
 import Mah.Agents.Data.ToolName (ToolName)
 import Mah.Agents.Effect.File (File)
-import Witch (From(..))
 
 data Tool
   = forall t

@@ -2,6 +2,8 @@ module Mah.Agents.Tool.Registry where
 
 import Data.Aeson qualified as Aeson
 import Data.Aeson.Types qualified as Aeson
+import Data.List.Extra (firstJust)
+import Data.Maybe (fromMaybe)
 import Data.Proxy (Proxy(..))
 import Data.Text (Text)
 import Mah.Agents.Data.ToolName (ToolName)
@@ -18,14 +20,15 @@ data SomeTool
 knownTools :: [SomeTool]
 knownTools = [SomeTool $ Proxy @ReadFiles]
 
--- | Iterate over 'knownTools', until a matched name is found, then parse it.
+-- | The first of 'knownTools' whose name matches, with its arguments parsed,
+-- wrapped as a 'Tool' ready to run.
 parseToolRequest :: ToolName -> Aeson.Value -> Aeson.Parser Tool
-parseToolRequest name args = go knownTools
+parseToolRequest name args =
+  fromMaybe (fail $ "Unknown tool: " <> from name) $ firstJust parse knownTools
  where
-  go [] = fail $ "Unknown tool: " <> from name
-  go (SomeTool (_ :: Proxy t) : rest)
-    | toolName @t == name = Tool <$> (Aeson.parseJSON args :: Aeson.Parser t)
-    | otherwise           = go rest
+  parse (SomeTool (_ :: Proxy t))
+    | toolName @t == name = Just $ Tool <$> Aeson.parseJSON @t args
+    | otherwise           = Nothing
 
 -- | Prompt descriptions for all known tools.
 toolDescriptions :: [Text]
