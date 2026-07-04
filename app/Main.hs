@@ -1,6 +1,6 @@
 module Main (main) where
 
-import Mah.Agents qualified
+import Agent.Bob qualified
 
 main :: IO ()
-main = Mah.Agents.main
+main = Agent.Bob.main

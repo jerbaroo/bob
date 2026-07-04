@@ -4,7 +4,7 @@ in
 pkgs.haskell-nix.cabalProject {
   compiler-nix-name = "ghc912";
   src = pkgs.haskell-nix.haskellLib.cleanGit {
-    name = "mah-agents";
+    name = "agent-bob";
     src = ./.;
   };
 }
