@@ -9,7 +9,7 @@ import Mah.Agents.Data.Message (Message(..))
 import Mah.Agents.Data.Role (Role(..))
 import Mah.Agents.Prompt (ToPrompt(..))
 import Mah.Agents.Tool.Registry (toolDescriptions)
-import Witch (from, tryInto)
+import Witch (tryInto)
 
 buildPrompt :: AgentInput -> Aeson.Value
 buildPrompt AgentInput{..} =
@@ -20,11 +20,14 @@ buildPrompt AgentInput{..} =
     , ("temperature", Aeson.toJSON modelTemperature)
     ]
  where
+  -- Events are stored newest-first; reverse into chronological order. The
+  -- current user input is among them ('UserInput' is recorded before the
+  -- agent is called), so no separate user message is added.
   eventMessages :: [Message]
-  eventMessages = catMaybes $ eitherToMaybe . tryInto @Message <$> events
+  eventMessages = reverse . catMaybes $ eitherToMaybe . tryInto @Message <$> events
 
   messages :: [Message]
-  messages = systemMessage : eventMessages <> [userMessage] <> toolResultMessages
+  messages = systemMessage : eventMessages <> toolResultMessages
 
   -- Tool results are appended as a fresh message so the original user input
   -- (above) stays intact for the whole tool-drain loop.
@@ -84,7 +87,3 @@ buildPrompt AgentInput{..} =
           , Just availableToolsStr
           ]
     in  Message {role=System, thinking=Nothing, ..}
-
-  userMessage :: Message
-  userMessage =
-    Message { content=from userInput, role=User, thinking=Nothing }

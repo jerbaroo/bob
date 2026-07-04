@@ -3,6 +3,7 @@ module Mah.Agents.Data.AgentOutput where
 import Control.Monad (unless)
 import Data.Aeson ((.:), (.:?), (.!=))
 import Data.Aeson qualified as Aeson
+import Data.Aeson.Types qualified as Aeson
 import Data.Text (Text)
 import Mah.Agents.Data.Event (IsEvent (..))
 import Mah.Agents.Data.FinishReason (FinishReason (..))
@@ -32,10 +33,7 @@ instance Aeson.FromJSON AgentOutput where
     let o = unsafePerformIO do
           putStrLn $ "Parsing AgentOutput from: " <> from (pretty o')
           pure o'
-    choice <- o .: "choices" >>= \case
-      [choice] -> pure choice
-      x -> fail $ "Expected exactly one choice, got: " <> show x
-    (message :: Message) <- choice .: "message"
+    (choice, message) <- parseChoiceAndMessage o
     -- Assert role field.
     unless (message.role == Assistant) $
       fail $ "Expected assistant role, got: " <> show message.role
@@ -57,12 +55,21 @@ instance Aeson.FromJSON AgentOutput where
       , ..
       }
 
+parseChoiceAndMessage :: Aeson.Object -> Aeson.Parser (Aeson.Object, Message)
+parseChoiceAndMessage o = o .: "choices" >>= \case
+  [choice] -> (choice,) <$> (choice .: "message")
+  x -> fail $ "Expected exactly one choice, got: " <> show x
+
 instance Aeson.ToJSON AgentOutput where
   toJSON AgentOutput{raw} = Aeson.Object raw
 
 instance IsEvent AgentOutput where
   eventName _ = "AgentOutput"
   eventTasks AgentOutput{..} = Just tasks
+  -- The assistant message exactly as the model produced it.
+  eventToMessage AgentOutput{raw} =
+    -- It's important we call this in @Aeson.FromJSON AgentOutput@.
+    snd <$> Aeson.parseMaybe parseChoiceAndMessage raw
 
 instance Pretty AgentOutput where
   pretty AgentOutput{} = "AgentOutput{..}" -- Too verbose to print anymore.
