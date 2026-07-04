@@ -3,8 +3,8 @@ module Mah.Agents.Data.ToolResult where
 import Data.Aeson qualified as Aeson
 import Data.Text (Text)
 import Mah.Agents.Data.Event (IsEvent(..))
-import Mah.Agents.Pretty (Pretty(..))
-import Mah.Agents.Tool (Tool)
+import Mah.Agents.Prompt (ToPrompt(..))
+import Mah.Agents.Tool (Tool, toolName')
 
 -- | The result of running one tool the model requested.
 data ToolResult = ToolResult
@@ -21,4 +21,5 @@ instance Aeson.ToJSON ToolResult where
 instance IsEvent ToolResult where
   eventName _ = "ToolResult"
 
-instance Pretty ToolResult
+instance ToPrompt ToolResult where
+  toPrompt ToolResult{..} = toolName' tool <> ":\n" <> output

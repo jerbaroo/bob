@@ -4,11 +4,10 @@ import Control.Monad.Hefty (Eff, (:>))
 import Data.Aeson qualified as Aeson
 import Data.Text (Text)
 import Mah.Agents.Effect.File (File)
-import Mah.Agents.Pretty (Pretty(..))
 
 data Tool
   = forall t
-  . (Aeson.FromJSON t, Aeson.ToJSON t, IsTool t, Pretty t, Show t)
+  . (Aeson.FromJSON t, Aeson.ToJSON t, IsTool t, Show t)
   => Tool t
 
 instance Aeson.ToJSON Tool where
@@ -16,9 +15,6 @@ instance Aeson.ToJSON Tool where
 
 instance Show Tool where
   show (Tool t) = show t
-
-instance Pretty Tool where
-  pretty (Tool t) = pretty t
 
 -- | Something the agent can ask the harness to do on its behalf.
 class IsTool t where

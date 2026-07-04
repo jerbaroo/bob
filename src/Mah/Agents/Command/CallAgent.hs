@@ -23,6 +23,7 @@ import Mah.Agents.Effect.Agent (callAgent)
 import Mah.Agents.Effect.Console (writeSection)
 import Mah.Agents.Effect.File (File, readFile)
 import Mah.Agents.Pretty (Pretty(..))
+import Mah.Agents.Prompt.Build (buildPrompt)
 import Witch (from, into)
 
 data CallAgent
@@ -33,9 +34,9 @@ instance IsCommand CallAgent where
   type Result CallAgent = AgentOutput
   runCommand agentId call = do
     agentInput <- mkAgentInput agentId call
-    writeSection System Debug $ "Agent input:\n" <> pretty agentInput
+    writeSection System Debug $ "Prompt sent to model:\n" <> pretty (buildPrompt agentInput)
     agentOutput <- callAgent agentInput
-    writeSection Assistant Debug $ "Raw model output:\n" <> pretty agentOutput.raw
+    writeSection Assistant Debug $ "Raw output from model:\n" <> pretty agentOutput.raw
     writeSection Assistant Meta $ pretty $ into @AgentOutputMeta agentOutput
     whenJust agentOutput.thinking $ writeSection Assistant Thinking . pretty
     writeSection Assistant Info $ pretty $ into @AgentOutputInfo agentOutput

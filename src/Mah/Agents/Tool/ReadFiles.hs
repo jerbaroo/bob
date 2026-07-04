@@ -7,7 +7,6 @@ import Data.Text (Text)
 import Data.Text qualified as Text
 import Prelude hiding (readFile)
 import Mah.Agents.Effect.File (readFile)
-import Mah.Agents.Pretty (Pretty(..))
 import Mah.Agents.Tool (IsTool(..))
 
 -- | Read one or more files within a directory.
@@ -27,10 +26,6 @@ instance Aeson.ToJSON ReadFiles where
     [ ("directory", Aeson.toJSON directory)
     , ("files", Aeson.toJSON files)
     ]
-
-instance Pretty ReadFiles where
-  pretty ReadFiles{..} =
-    "ReadFiles " <> directory <> " [" <> Text.intercalate ", " files <> "]"
 
 instance IsTool ReadFiles where
   type ToolOutput ReadFiles = [(Text, Maybe Text)]

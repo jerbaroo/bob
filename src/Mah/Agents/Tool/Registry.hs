@@ -5,13 +5,12 @@ import Data.Aeson.Types qualified as Aeson
 import Data.Proxy (Proxy(..))
 import Data.Text (Text)
 import Data.Text qualified as Text
-import Mah.Agents.Pretty (Pretty(..))
 import Mah.Agents.Tool (IsTool(..), Tool(..))
 import Mah.Agents.Tool.ReadFiles (ReadFiles)
 
 -- | An existential over a tool type (not a value).
 data SomeTool
-  = forall t. (Aeson.FromJSON t, Aeson.ToJSON t, IsTool t, Pretty t, Show t)
+  = forall t. (Aeson.FromJSON t, Aeson.ToJSON t, IsTool t, Show t)
   => SomeTool (Proxy t)
 
 -- | Every tool the harness knows how to run.

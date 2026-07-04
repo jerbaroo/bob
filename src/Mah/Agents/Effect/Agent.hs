@@ -5,6 +5,7 @@ import Data.Effect.Reader (Ask, ask)
 import Mah.Agents.Data.AgentInput (AgentInput)
 import Mah.Agents.Data.AgentOutput (AgentOutput(..))
 import Mah.Agents.Data.Config (Config(..))
+import Mah.Agents.Prompt.Build (buildPrompt)
 import Network.HTTP.Request (Response(body))
 import Network.HTTP.Client (newManager, managerResponseTimeout, responseTimeoutMicro)
 import Network.HTTP.Client.TLS (tlsManagerSettings)
@@ -29,7 +30,7 @@ runAgent = interpret \case
             { method = POST
             , url = from config.engineUrl
             , headers = []
-            , body = Just agentInput
+            , body = Just $ buildPrompt agentInput
             }
       sendWith manager request
     pure response.body
