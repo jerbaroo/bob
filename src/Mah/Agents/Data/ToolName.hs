@@ -3,6 +3,7 @@ module Mah.Agents.Data.ToolName where
 import Data.Aeson qualified as Aeson
 import Data.String (IsString)
 import Data.Text (Text)
+import Data.Typeable (TypeRep)
 import Mah.Agents.Pretty (Pretty)
 import Witch (From(..), via)
 
@@ -15,3 +16,6 @@ instance From ToolName Text where
 
 instance From ToolName String where
   from = via @Text
+
+instance From TypeRep ToolName where
+  from = via @Text . show

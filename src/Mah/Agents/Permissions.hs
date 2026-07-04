@@ -10,7 +10,7 @@ import Prelude hiding (readFile)
 import Mah.Agents.Data.Config (Config(..))
 import Mah.Agents.Data.Permission (Permission(..), parsePermission)
 import Mah.Agents.Effect.File (File, readFile)
-import Mah.Agents.Tool (IsTool(..), Tool(..))
+import Mah.Agents.Tool (IsTool(..), Tool(..), toolName)
 import Witch (from)
 
 -- | The granted permissions, read fresh from the source of truth every check.

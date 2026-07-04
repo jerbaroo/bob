@@ -2,9 +2,12 @@ module Mah.Agents.Tool where
 
 import Control.Monad.Hefty (Eff, (:>))
 import Data.Aeson qualified as Aeson
+import Data.Proxy (Proxy(..))
 import Data.Text (Text)
+import Data.Typeable (Typeable, typeRep)
 import Mah.Agents.Data.ToolName (ToolName)
 import Mah.Agents.Effect.File (File)
+import Witch (from)
 
 data Tool
   = forall t
@@ -18,7 +21,7 @@ instance Show Tool where
   show (Tool t) = show t
 
 -- | Something the agent can ask the harness to do on its behalf.
-class IsTool t where
+class Typeable t => IsTool t where
   type ToolOutput t
   -- | Decide whether a single permission grant covers this invocation.
   permissionGranted :: (File :> es) => t -> Text -> Eff es Bool
@@ -28,8 +31,10 @@ class IsTool t where
   runTool :: (File :> es) => t -> Eff es (ToolOutput t)
   -- | Human/model readable description injected into the prompt,
   toolDescription :: Text
-  -- | The name the model uses to request this tool.
-  toolName :: ToolName
+
+-- | The name the model uses to request a tool, derived from the type name.
+toolName :: forall t. Typeable t => ToolName
+toolName = from $ typeRep (Proxy @t)
 
 toolName' :: Tool -> ToolName
 toolName' (Tool (_ :: t)) = toolName @t

@@ -48,4 +48,3 @@ instance IsTool ReadFiles where
     , "  Arguments: {\"directory\": \"<path>\", \"files\": [\"<name>\", ...]}"
     , "  Example: {\"name\": \"ReadFiles\", \"arguments\": {\"directory\": \"src\", \"files\": [\"Main.hs\"]}}"
     ]
-  toolName = "ReadFiles"

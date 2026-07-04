@@ -7,7 +7,7 @@ import Data.Maybe (fromMaybe)
 import Data.Proxy (Proxy(..))
 import Data.Text (Text)
 import Mah.Agents.Data.ToolName (ToolName)
-import Mah.Agents.Tool (IsTool(..), Tool(..))
+import Mah.Agents.Tool (IsTool(..), Tool(..), toolName)
 import Mah.Agents.Tool.ReadFiles (ReadFiles)
 import Witch (from)
 
