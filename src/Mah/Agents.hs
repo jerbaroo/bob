@@ -70,7 +70,7 @@ run agentId = do
       drainTools userInput output'
 
   -- | Run a command, record the events, and return the command result.
-  step :: (Aeson.ToJSON c, Harness es, IsCommand c, IsEvent c, Pretty c) => c -> Eff es (Result c)
+  step :: (Aeson.ToJSON c, Harness es, IsCommand c, IsEvent c) => c -> Eff es (Result c)
   step command = do
     (result, events) <- runCommand agentId command
     recordEvents agentId $ from (Command command) : events

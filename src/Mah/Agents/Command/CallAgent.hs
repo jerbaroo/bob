@@ -52,8 +52,6 @@ instance Aeson.ToJSON CallAgent where
 instance IsEvent CallAgent where
   eventName _ = "CallAgent"
 
-instance Pretty CallAgent
-
 -- | Input to an agent derived from the harness state.
 mkAgentInput
   :: (Ask Config :> es, File :> es, State HarnessState :> es)

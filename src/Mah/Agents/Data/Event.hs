@@ -6,12 +6,11 @@ import Data.Aeson qualified as Aeson
 import Data.Text (Text)
 import Mah.Agents.Data.Task (Task)
 import Mah.Agents.Data.Message (Message)
-import Mah.Agents.Pretty (Pretty(..))
 import Witch (From(..), TryFrom(..), maybeTryFrom)
 
-data Event = forall e. (Aeson.ToJSON e, IsEvent e, Pretty e) => Event e
+data Event = forall e. (Aeson.ToJSON e, IsEvent e) => Event e
 
-instance (Aeson.ToJSON e, IsEvent e, Pretty e) => From e Event where
+instance (Aeson.ToJSON e, IsEvent e) => From e Event where
   from = Event
 
 instance IsEvent Event where

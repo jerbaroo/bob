@@ -6,7 +6,6 @@ import Mah.Agents.Command (IsCommand(..))
 import Mah.Agents.Data.Event (IsEvent(..))
 import Mah.Agents.Data.UserInput (UserInput)
 import Mah.Agents.Effect.Console (readUserInput)
-import Mah.Agents.Pretty (Pretty(..))
 import Witch (from)
 
 data ReadConsole = ReadConsole
@@ -20,5 +19,3 @@ instance Aeson.ToJSON ReadConsole where
 
 instance IsEvent ReadConsole where
   eventName _ = "ReadConsole"
-
-instance Pretty ReadConsole
