@@ -7,6 +7,7 @@ import Data.Effect.Reader (asks, runAsk)
 import Data.Effect.State (evalStateIORef, modify)
 import Data.Map qualified as Map
 import Data.Maybe (mapMaybe)
+import Data.Text (Text)
 import Data.Text qualified as Text
 import Prelude hiding (readFile)
 import Mah.Agents.Command (Command(..), Harness, step)
@@ -24,6 +25,8 @@ import Mah.Agents.Effect.File (readFile, runFile)
 import Mah.Agents.Pretty (Pretty(..))
 import Mah.Agents.UserCommand.Registry (parseCommand)
 import Safe (lastMay)
+import System.Directory (getCurrentDirectory)
+import Witch (from)
 
 -- | Restore the session from the persisted event log, so the model starts
 -- with the context of previous runs instead of starting fresh. Lines that
@@ -51,12 +54,23 @@ run agentId = do
     void $ step agentId command
   run agentId
 
+-- | Sessions are stored centrally but keyed by the directory the tool is
+-- started from, so each project keeps its own history.
+sessionPath :: FilePath -> Text
+sessionPath cwd = "~/.mah-agents/sessions/" <> sessionName cwd
+
+sessionName :: String -> Text
+sessionName cwd = case Text.uncons $ Text.replace "/" "-" $ from cwd of
+  Just ('-', rest) -> rest
+  _ -> error $ "Current working directory should begin with /"
+
 main :: IO ()
 main = do
+  cwd <- getCurrentDirectory
   let config = Config
         { engineUrl = "http://127.0.0.1:8080/v1/chat/completions"
         , logLevel = Debug
-        , memoryPath = "~/.mah-agents/sessions/default"
+        , memoryPath = sessionPath cwd
         , modelName = "Qwen"
         , modelTemperature = 0.5
         , permissionsPath = "~/.mah-agents/permissions"
