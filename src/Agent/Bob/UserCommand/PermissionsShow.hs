@@ -4,12 +4,10 @@ import Data.Aeson qualified as Aeson
 import Agent.Bob.Command (IsCommand(..))
 import Agent.Bob.Data.Event (IsEvent(..))
 import Agent.Bob.Data.Level (Level(..))
-import Agent.Bob.Data.Permission (Permission(..))
 import Agent.Bob.Data.Role (Role(..))
 import Agent.Bob.Effect.Console (writeSection)
-import Agent.Bob.Permissions (readPermissions)
+import Agent.Bob.Permissions (readPermissions, renderPermissions)
 import Agent.Bob.Prelude
-import Agent.Bob.Pretty (Pretty(..))
 import Agent.Bob.UserCommand (IsUserCommand(..))
 
 -- | Print the granted permissions to the console: @/permissions show@.
@@ -22,10 +20,7 @@ instance IsCommand PermissionsShow where
   type Result PermissionsShow = ()
   runCommand _agentId PermissionsShow = do
     permissions <- readPermissions
-    writeSection System Info $ case permissions of
-      [] -> "No permissions granted."
-      _  -> "Permissions:\n"
-        <> pretty (((.toolName) &&& (.param)) <$> permissions)
+    writeSection System Info $ renderPermissions permissions
     pure ((), [])
 
 instance IsEvent PermissionsShow where

@@ -14,6 +14,7 @@ import Agent.Bob.Data.Role (Role(..))
 import Agent.Bob.Effect.Agent (runAgent)
 import Agent.Bob.Effect.Console (runConsole, writeSection)
 import Agent.Bob.Effect.File (readFile, runFile)
+import Agent.Bob.Permissions (readPermissions, renderPermissions)
 import Agent.Bob.Pretty (Pretty(..))
 import Agent.Bob.UserCommand.Registry (parseCommand)
 import Control.Monad (filterM)
@@ -65,6 +66,7 @@ main = do
   runEff . runAsk config . runAgent . runConsole . runFile (from config.projectRoot) . evalStateIORef initialState $ do
     writeSection System Info $ "Hi. I'm Bob. Type /help for assistance.\n\n" <> pretty config
     checkInitFiles
+    readPermissions >>= writeSection System Info . renderPermissions
     let agentId = AgentId 0
     restoreSession agentId
     run agentId

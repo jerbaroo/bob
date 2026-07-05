@@ -4,6 +4,7 @@ import Agent.Bob.Data.Config (Config, ConfigF(..))
 import Agent.Bob.Data.Permission (Permission(..), parsePermission)
 import Agent.Bob.Effect.File (File, readFile)
 import Agent.Bob.Prelude hiding (readFile)
+import Agent.Bob.Pretty (Pretty(..))
 import Agent.Bob.Tool (IsTool(..), Tool(..), toolName)
 import Data.Text qualified as Text
 
@@ -13,6 +14,13 @@ readPermissions =
   asks (.permissionsPath)
   >>= readFile
   <&> maybe [] (mapMaybe parsePermission . Text.lines)
+
+-- | Render the granted permissions for the console; shared by the startup
+-- report and @/permissions show@.
+renderPermissions :: [Permission] -> Text
+renderPermissions [] = "No permissions granted."
+renderPermissions permissions =
+  "Permissions:\n" <> pretty (((.toolName) &&& (.param)) <$> permissions)
 
 -- | Ensure a tool invocation is permitted before it runs; error if not.
 checkPermission :: (Ask Config :> es, File :> es) => Tool -> Eff es ()
