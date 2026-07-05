@@ -63,6 +63,9 @@ library
                     , Agent.Bob.Command
                     , Agent.Bob.Command.CallAgent
                     , Agent.Bob.Command.ReadConsole
+                    , Agent.Bob.Config
+                    , Agent.Bob.Config.Cli
+                    , Agent.Bob.Config.File
                     , Agent.Bob.Data.AgentId
                     , Agent.Bob.Data.AgentInput
                     , Agent.Bob.Data.AgentOutput
@@ -138,6 +141,7 @@ library
                     , heftia-effects
                     , http-client
                     , http-client-tls
+                    , optparse-applicative
                     , quickcheck-instances
                     , request
                     , safe
@@ -182,7 +186,9 @@ test-suite agent-bob-test
     default-language: GHC2024
 
     -- Modules included in this executable, other than Main.
-    -- other-modules:
+    other-modules:    Test.Config
+                    , Test.Event
+                    , Test.Schema
 
     default-extensions: AllowAmbiguousTypes
                       , BlockArguments
@@ -216,4 +222,5 @@ test-suite agent-bob-test
         agent-bob,
         base,
         hspec,
+        optparse-applicative,
         text

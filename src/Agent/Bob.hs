@@ -3,8 +3,9 @@ module Agent.Bob where
 import Agent.Bob.Prelude hiding (readFile)
 import Agent.Bob.Command (Command(..), Harness, step)
 import Agent.Bob.Command.ReadConsole (ReadConsole(..))
+import Agent.Bob.Config (loadConfig)
+import Agent.Bob.Data.Config (ConfigF(..))
 import Agent.Bob.Data.AgentId (AgentId(..))
-import Agent.Bob.Data.Config (Config(..))
 import Agent.Bob.Data.Event (IsEvent(..))
 import Agent.Bob.Data.Event.Registry (parseEventLine)
 import Agent.Bob.Data.HarnessState (HarnessState(..), mkHarnessState)
@@ -18,7 +19,6 @@ import Agent.Bob.UserCommand.Registry (parseCommand)
 import Data.Effect.State (evalStateIORef)
 import Data.Map qualified as Map
 import Data.Text qualified as Text
-import System.Directory (getCurrentDirectory)
 
 -- | Restore the session from the persisted event log, so the model starts
 -- with the context of previous runs instead of starting fresh. Lines that
@@ -46,32 +46,12 @@ run agentId = do
     void $ step agentId command
   run agentId
 
--- | Sessions are stored centrally but keyed by the directory the tool is
--- started from, so each project keeps its own history.
-sessionPath :: FilePath -> Text
-sessionPath cwd = "~/.mah-agents/sessions/" <> sessionName cwd
-
-sessionName :: String -> Text
-sessionName cwd = case Text.uncons $ Text.replace "/" "-" $ from cwd of
-  Just ('-', rest) -> rest
-  _ -> error $ "Current working directory should begin with /"
-
 main :: IO ()
 main = do
-  cwd <- getCurrentDirectory
-  let config = Config
-        { engineUrl = "http://127.0.0.1:8080/v1/chat/completions"
-        , logLevel = Debug
-        , memoryPath = sessionPath cwd
-        , modelName = "Qwen"
-        , modelTemperature = 0.5
-        , permissionsPath = "~/.mah-agents/permissions"
-        , soulPath = Just "~/.config/mah-agents/SOUL.md"
-        , timeoutSeconds = 10 * 60 -- 10 minutes.
-        }
+  config <- loadConfig
   let initialState = mkHarnessState config
   runEff . runAsk config . runAgent . runConsole . runFile . evalStateIORef initialState $ do
-    writeSection System Info $ "Type /help for assistance.\n\n" <> pretty config
+    writeSection System Info $ "Hi. I'm Bob. Type /help for assistance.\n\n" <> pretty config
     let agentId = AgentId 0
     restoreSession agentId
     run agentId

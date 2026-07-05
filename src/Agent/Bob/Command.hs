@@ -1,7 +1,7 @@
 module Agent.Bob.Command where
 
 import Agent.Bob.Data.AgentId (AgentId)
-import Agent.Bob.Data.Config (Config(..))
+import Agent.Bob.Data.Config (Config, ConfigF(..))
 import Agent.Bob.Data.Event (Event, IsEvent(..))
 import Agent.Bob.Data.HarnessState (HarnessState(..))
 import Agent.Bob.Data.Level (Level(..))

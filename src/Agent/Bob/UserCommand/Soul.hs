@@ -1,7 +1,7 @@
 module Agent.Bob.UserCommand.Soul where
 
 import Agent.Bob.Command (IsCommand(..))
-import Agent.Bob.Data.Config (Config(..))
+import Agent.Bob.Data.Config (ConfigF(..))
 import Agent.Bob.Data.Event (IsEvent(..))
 import Agent.Bob.Data.Level (Level(..))
 import Agent.Bob.Data.Role (Role(..))

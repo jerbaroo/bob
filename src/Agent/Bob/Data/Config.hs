@@ -4,22 +4,45 @@ import Agent.Bob.Prelude
 import Agent.Bob.Data.Level (Level)
 import Agent.Bob.Data.Temperature (Temperature)
 import Agent.Bob.Pretty (Pretty(..))
+import Control.Applicative ((<|>))
+import Data.Aeson ((.:?))
+import Data.Aeson qualified as Aeson
+import Data.Functor.Identity (Identity)
 
-data Config = Config
-  { engineUrl :: Text
-  , logLevel :: Level
-  , memoryPath :: Text
-  , modelName :: Text
-  , modelTemperature :: Temperature
-  , permissionsPath :: Text
-  , soulPath :: Maybe Text
-  , timeoutSeconds :: Int
+-- | Where the config file is read from unless @--config-path@ overrides it.
+defaultConfigPath :: Text
+defaultConfigPath = "~/.config/agent-bob/config.json"
+
+-- | Higher-kinded field wrapper.
+type family HKD f a where
+  HKD Identity a = a
+  HKD f a = f a
+
+-- | The harness configuration.
+data ConfigF f = Config
+  { configPath :: HKD f Text
+  , engineUrl :: HKD f Text
+  , logLevel :: HKD f Level
+  , memoryPath :: HKD f Text
+  , modelName :: HKD f Text
+  , modelTemperature :: HKD f Temperature
+  , permissionsPath :: HKD f Text
+  , soulPath :: HKD f (Maybe Text)
+  , timeoutSeconds :: HKD f Int
   }
+
+-- | A fully-resolved configuration.
+type Config = ConfigF Identity
+
+-- | A set of overrides: 'Nothing' in a field means "not specified, fall back
+-- to a lower-precedence source".
+type PartialConfig = ConfigF Maybe
 
 instance Pretty Config where
   pretty Config{..} =
     let prettyConfig = pretty $ catMaybes
-          [ Just ("engine_url", engineUrl)
+          [ Just ("config_path", configPath)
+          , Just ("engine_url", engineUrl)
           , Just ("log_level" :: Text, pretty logLevel)
           , Just ("memory_path", memoryPath)
           , Just ("model_name", modelName)
@@ -28,4 +51,67 @@ instance Pretty Config where
           , ("soul_path",) <$> soulPath
           , Just ("timeout_seconds", pretty timeoutSeconds)
           ]
-    in "Configuration:\n" <> prettyConfig
+    in "Config:\n" <> prettyConfig
+
+-- | The empty partial config: nothing specified.
+emptyPartial :: PartialConfig
+emptyPartial = Config
+  { configPath = Nothing
+  , engineUrl = Nothing
+  , logLevel = Nothing
+  , memoryPath = Nothing
+  , modelName = Nothing
+  , modelTemperature = Nothing
+  , permissionsPath = Nothing
+  , soulPath = Nothing
+  , timeoutSeconds = Nothing
+  }
+
+instance Monoid PartialConfig where
+  mempty = emptyPartial
+
+-- | Left-biased: for each field the first 'Just' wins.
+instance Semigroup PartialConfig where
+  a <> b = Config
+    { configPath = a.configPath <|> b.configPath
+    , engineUrl = a.engineUrl <|> b.engineUrl
+    , logLevel = a.logLevel <|> b.logLevel
+    , memoryPath = a.memoryPath <|> b.memoryPath
+    , modelName = a.modelName <|> b.modelName
+    , modelTemperature = a.modelTemperature <|> b.modelTemperature
+    , permissionsPath = a.permissionsPath <|> b.permissionsPath
+    , soulPath = a.soulPath <|> b.soulPath
+    , timeoutSeconds = a.timeoutSeconds <|> b.timeoutSeconds
+    }
+
+-- | Apply values from the partial config over a base (default) config.
+applyPartial :: PartialConfig -> Config -> Config
+applyPartial p c = Config
+  { configPath = fromMaybe c.configPath p.configPath
+  , engineUrl = fromMaybe c.engineUrl p.engineUrl
+  , logLevel = fromMaybe c.logLevel p.logLevel
+  , memoryPath = fromMaybe c.memoryPath p.memoryPath
+  , modelName = fromMaybe c.modelName p.modelName
+  , modelTemperature = fromMaybe c.modelTemperature p.modelTemperature
+  , permissionsPath = fromMaybe c.permissionsPath p.permissionsPath
+  , soulPath = fromMaybe c.soulPath p.soulPath
+  , timeoutSeconds = fromMaybe c.timeoutSeconds p.timeoutSeconds
+  }
+
+-- | Parse a config file's JSON into a 'PartialConfig'.
+instance Aeson.FromJSON PartialConfig where
+  parseJSON = Aeson.withObject "PartialConfig" \o -> do
+    -- Only the CLI can choose which file is read, so a "config_path" key in
+    -- the file itself doesn't make any sense.
+    configPath <- o .:? "config_path" >>= \case
+      Nothing -> pure Nothing
+      Just (_ :: Text) -> fail "config_path should not exist in config file"
+    engineUrl <- o .:? "engine_url"
+    logLevel <- o .:? "log_level"
+    memoryPath <- o .:? "memory_path"
+    modelName <- o .:? "model_name"
+    modelTemperature <- o .:? "model_temperature"
+    permissionsPath <- o .:? "permissions_path"
+    soulPath <- o .:? "soul_path"
+    timeoutSeconds <- o .:? "timeout_seconds"
+    pure Config{..}

@@ -2,7 +2,7 @@ module Agent.Bob.Effect.Agent where
 
 import Agent.Bob.Data.AgentInput (AgentInput)
 import Agent.Bob.Data.AgentOutput (AgentOutput(..))
-import Agent.Bob.Data.Config (Config(..))
+import Agent.Bob.Data.Config (Config, ConfigF(..))
 import Agent.Bob.Prelude
 import Agent.Bob.Prompt.Build (buildPrompt)
 import Network.HTTP.Request (Response(body))

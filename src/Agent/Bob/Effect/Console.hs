@@ -2,7 +2,7 @@ module Agent.Bob.Effect.Console where
 
 import Agent.Bob.Prelude
 import Data.Text qualified as Text
-import Agent.Bob.Data.Config (Config(..))
+import Agent.Bob.Data.Config (Config, ConfigF(..))
 import Agent.Bob.Data.HarnessState (HarnessState(..))
 import Agent.Bob.Data.Level (Level(..))
 import Agent.Bob.Data.Role (Role(..))
@@ -26,7 +26,9 @@ runConsole = interpret \case
 
 -- * Wrappers.
 
-readUserInput :: (Console :> es, State HarnessState :> es) => Eff es UserInput
+readUserInput
+  :: (Ask Config :> es, Console :> es, State HarnessState :> es)
+  => Eff es UserInput
 readUserInput = do
   writeSeparator User
   modify $ \s -> s { loggingRole = Just User }
@@ -48,17 +50,18 @@ writeSection role messageLevel message = do
     writeConsole $ vSep <> Text.stripEnd message <> "\n"
     modify $ \s -> s{loggingRole=Just role}
 
-writeSeparator :: (Console :> es) => Role -> Eff es ()
-writeSeparator role =
+writeSeparator :: (Ask Config :> es, Console :> es) => Role -> Eff es ()
+writeSeparator role = do
+  modelName <- asks (.modelName)
   let roleText = case role of
-        Assistant -> "Agent Bob"
-        System -> "System"
+        Assistant -> "Bob (" <> modelName <> ")"
+        System -> "Bob"
         User -> "You"
       roleLen = Text.length roleText
       separator = "------------------------------------------------------------"
-  in  writeConsole $ Pretty.colour Pretty.cyanDim
-        $  "\n- "
-        <> roleText
-        <> " "
-        <> Text.drop (roleLen + 3) separator -- +3 for two spaces and one '-'.
-        <> "\n"
+  writeConsole $ Pretty.colour Pretty.cyanDim
+    $  "\n- "
+    <> roleText
+    <> " "
+    <> Text.drop (roleLen + 3) separator -- +3 for two spaces and one '-'.
+    <> "\n"

@@ -1,6 +1,6 @@
 module Agent.Bob.Permissions where
 
-import Agent.Bob.Data.Config (Config(..))
+import Agent.Bob.Data.Config (Config, ConfigF(..))
 import Agent.Bob.Data.Permission (Permission(..), parsePermission)
 import Agent.Bob.Effect.File (File, readFile)
 import Agent.Bob.Prelude hiding (readFile)

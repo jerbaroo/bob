@@ -5,7 +5,7 @@ import Data.Map qualified as Map
 import Agent.Bob.Prelude hiding (read)
 import Agent.Bob.Data.AgentId (AgentId)
 import Agent.Bob.Data.Task (Task)
-import Agent.Bob.Data.Config (Config(..))
+import Agent.Bob.Data.Config (Config, ConfigF(..))
 import Agent.Bob.Data.Event (Event)
 import Agent.Bob.Data.Role (Role)
 import Agent.Bob.Data.Temperature (Temperature)
