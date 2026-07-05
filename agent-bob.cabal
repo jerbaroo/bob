@@ -96,8 +96,10 @@ library
                     , Agent.Bob.UserCommand
                     , Agent.Bob.UserCommand.AgentCall
                     , Agent.Bob.UserCommand.ConfigShow
+                    , Agent.Bob.UserCommand.Help
                     , Agent.Bob.UserCommand.PermissionsShow
                     , Agent.Bob.UserCommand.Registry
+                    , Agent.Bob.UserCommand.Registry.Base
 
     -- Modules included in this library but not exported.
     -- other-modules:

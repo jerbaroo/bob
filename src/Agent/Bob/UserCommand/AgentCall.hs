@@ -24,6 +24,9 @@ newtype AgentCall = AgentCall UserInput
 
 instance IsUserCommand AgentCall where
   parseUserCommand = Just . AgentCall
+  userCommandDescription =
+    "Send the input to the agent and run any tools it requests."
+  userCommandName = []
 
 instance IsCommand AgentCall where
   type Result AgentCall = ()

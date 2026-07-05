@@ -2,7 +2,6 @@ module Agent.Bob.UserCommand.ConfigShow where
 
 import Data.Aeson qualified as Aeson
 import Data.Effect.Reader (ask)
-import Data.Text qualified as Text
 import Agent.Bob.Command (IsCommand(..))
 import Agent.Bob.Data.Config (Config)
 import Agent.Bob.Data.Event (IsEvent(..))
@@ -11,15 +10,15 @@ import Agent.Bob.Data.Role (Role(..))
 import Agent.Bob.Effect.Console (writeSection)
 import Agent.Bob.Pretty (Pretty(..))
 import Agent.Bob.UserCommand (IsUserCommand(..))
-import Witch (from)
 
 -- | Print the current configuration to the console: @/config show@.
 data ConfigShow = ConfigShow
 
 instance IsUserCommand ConfigShow where
-  parseUserCommand input
-    | Text.words (from input) == ["/config", "show"] = Just ConfigShow
-    | otherwise = Nothing
+  mkUserCommand [] = Just ConfigShow
+  mkUserCommand _ = Nothing
+  userCommandDescription = "Print the current configuration."
+  userCommandName = ["/config", "show"]
 
 instance IsCommand ConfigShow where
   type Result ConfigShow = ()

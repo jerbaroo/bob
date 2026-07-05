@@ -15,6 +15,9 @@ newtype UserInput = UserInput Text
 instance From String UserInput where
   from = via @Text
 
+instance From UserInput String where
+  from = via @Text
+
 instance From UserInput Text
 
 instance IsEvent UserInput where

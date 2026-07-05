@@ -2,7 +2,6 @@ module Agent.Bob.UserCommand.PermissionsShow where
 
 import Control.Arrow ((&&&))
 import Data.Aeson qualified as Aeson
-import Data.Text qualified as Text
 import Agent.Bob.Command (IsCommand(..))
 import Agent.Bob.Data.Event (IsEvent(..))
 import Agent.Bob.Data.Level (Level(..))
@@ -12,15 +11,15 @@ import Agent.Bob.Effect.Console (writeSection)
 import Agent.Bob.Permissions (readPermissions)
 import Agent.Bob.Pretty (Pretty(..))
 import Agent.Bob.UserCommand (IsUserCommand(..))
-import Witch (from)
 
 -- | Print the granted permissions to the console: @/permissions show@.
 data PermissionsShow = PermissionsShow
 
 instance IsUserCommand PermissionsShow where
-  parseUserCommand input
-    | Text.words (from input) == ["/permissions", "show"] = Just PermissionsShow
-    | otherwise = Nothing
+  mkUserCommand [] = Just PermissionsShow
+  mkUserCommand _ = Nothing
+  userCommandDescription = "Print the granted permissions."
+  userCommandName = ["/permissions", "show"]
 
 instance IsCommand PermissionsShow where
   type Result PermissionsShow = ()

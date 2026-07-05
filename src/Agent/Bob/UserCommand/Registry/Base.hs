@@ -1,0 +1,24 @@
+module Agent.Bob.UserCommand.Registry.Base where
+
+import Data.Aeson qualified as Aeson
+import Data.Proxy (Proxy(..))
+import Agent.Bob.Command (IsCommand)
+import Agent.Bob.Data.Event (IsEvent)
+import Agent.Bob.UserCommand (IsUserCommand)
+import Agent.Bob.UserCommand.AgentCall (AgentCall)
+import Agent.Bob.UserCommand.ConfigShow (ConfigShow)
+import Agent.Bob.UserCommand.PermissionsShow (PermissionsShow)
+
+-- | An existential over a user command type (not a value).
+data SomeUserCommand
+  = forall c. (Aeson.ToJSON c, IsCommand c, IsEvent c, IsUserCommand c)
+  => SomeUserCommand (Proxy c)
+
+-- | Every user command except 'Agent.Bob.UserCommand.Help.Help', which
+-- renders this list and so cannot appear in it without an import cycle.
+baseUserCommands :: [SomeUserCommand]
+baseUserCommands =
+  [ SomeUserCommand $ Proxy @ConfigShow
+  , SomeUserCommand $ Proxy @PermissionsShow
+  , SomeUserCommand $ Proxy @AgentCall
+  ]
