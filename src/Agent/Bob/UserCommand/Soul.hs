@@ -8,6 +8,7 @@ import Agent.Bob.Data.Role (Role(..))
 import Agent.Bob.Effect.Console (writeSection)
 import Agent.Bob.Effect.File (readFile)
 import Agent.Bob.Prelude hiding (readFile)
+import Agent.Bob.Soul (getSoul)
 import Agent.Bob.UserCommand (IsUserCommand(..))
 import Data.Aeson qualified as Aeson
 
@@ -21,13 +22,15 @@ instance IsCommand Soul where
   type Result Soul = ()
   runCommand _agentId Soul = do
     soulPath <- asks (.soulPath)
-    message <- case soulPath of
-      Nothing   -> pure "No soul configured."
-      Just path -> maybe
-        ("No soul found at " <> path <> ".")
-        (\soul -> "Soul (" <> path <> "):\n\n" <> soul)
-        <$> readFile path
-    writeSection System Info message
+    -- Read the file only to report where the soul came from; 'getSoul' is
+    -- the source of truth for the text itself (and its change detection).
+    fromFile <- maybe (pure Nothing) readFile soulPath
+    soul <- getSoul
+    let header = case (soulPath, fromFile) of
+          (Just path, Just _)  -> "Soul (" <> path <> "):"
+          (Just path, Nothing) -> "Default soul (no file at " <> path <> "):"
+          (Nothing, _)         -> "Default soul (no soul_path configured):"
+    writeSection System Info $ header <> "\n\n" <> soul
     pure ((), [])
 
 instance IsEvent Soul where

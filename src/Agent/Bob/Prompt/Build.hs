@@ -59,12 +59,12 @@ buildPrompt AgentInput{..} =
           ]
         availableToolsStr = Text.intercalate "\n"
           $ "### AVAILABLE TOOLS" : toolDescriptions
-        content = Text.intercalate "\n\n" $ catMaybes
-          [ Just personaStr
+        content = Text.intercalate "\n\n"
+          [ personaStr
           , modelSoul
-          , Just $ tasksStr modelTasks
-          , Just responseFormatStr
-          , Just availableToolsStr
+          , tasksStr modelTasks
+          , responseFormatStr
+          , availableToolsStr
           ]
     in  Message {role=System, thinking=Nothing, ..}
 

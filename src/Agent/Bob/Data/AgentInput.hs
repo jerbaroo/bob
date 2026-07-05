@@ -12,7 +12,7 @@ data AgentInput = AgentInput
   --   May be a compressed version of the full history.
   , modelName :: Text
   , modelTemperature :: Temperature
-  , modelSoul :: Maybe Text
+  , modelSoul :: Text
   , modelTasks :: [Task]
   -- ^ Current tasks to complete.
   }

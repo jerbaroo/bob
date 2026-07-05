@@ -18,6 +18,9 @@ data HarnessState = HarnessState
   , tasks :: Map AgentId [Task]
   -- ^ The current tasks per-agent.
   , modelTemperature :: Temperature
+  , soulText :: Maybe Text
+  -- ^ The soul as of the last read; 'Nothing' until first read. Kept so a
+  -- change to the soul file mid-session can be detected and reported.
   }
 
 mkHarnessState :: Config -> HarnessState
@@ -25,5 +28,6 @@ mkHarnessState Config{..} = HarnessState
   { events = Map.empty
   , loggingRole = Nothing
   , modelTemperature
+  , soulText = Nothing
   , tasks = Map.empty
   }

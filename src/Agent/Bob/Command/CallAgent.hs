@@ -11,11 +11,12 @@ import Agent.Bob.Data.Level (Level(..))
 import Agent.Bob.Data.Message (Message(..))
 import Agent.Bob.Data.Role (Role(..))
 import Agent.Bob.Effect.Agent (callAgent)
-import Agent.Bob.Effect.Console (writeSection)
-import Agent.Bob.Effect.File (File, readFile)
-import Agent.Bob.Prelude hiding (readFile)
+import Agent.Bob.Effect.Console (Console, writeSection)
+import Agent.Bob.Effect.File (File)
+import Agent.Bob.Prelude
 import Agent.Bob.Pretty (Pretty(..))
 import Agent.Bob.Prompt.Build (buildPrompt)
+import Agent.Bob.Soul (getSoul)
 import Data.Aeson qualified as Aeson
 import Data.Map qualified as Map
 
@@ -45,12 +46,12 @@ instance IsEvent CallAgent where
 
 -- | Input to an agent derived from the harness state.
 mkAgentInput
-  :: (Ask Config :> es, File :> es, State HarnessState :> es)
+  :: (Ask Config :> es, Console :> es, File :> es, State HarnessState :> es)
   => AgentId -> Eff es AgentInput
 mkAgentInput agentId = do
-  Config{modelName, soulPath} <- ask
+  Config{modelName} <- ask
+  modelSoul <- getSoul
   HarnessState{..} <- get
-  modelSoul <- maybe (pure Nothing) readFile soulPath
   pure AgentInput
     { events = fromMaybe [] $ Map.lookup agentId events
     , modelTasks = fromMaybe [] $ Map.lookup agentId tasks
