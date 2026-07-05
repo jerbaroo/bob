@@ -102,6 +102,7 @@ library
                     , Agent.Bob.UserCommand.PermissionsShow
                     , Agent.Bob.UserCommand.Registry
                     , Agent.Bob.UserCommand.Registry.Base
+                    , Agent.Bob.UserCommand.Soul
 
     -- Modules included in this library but not exported.
     -- other-modules:

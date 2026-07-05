@@ -8,6 +8,7 @@ import Agent.Bob.UserCommand (IsUserCommand)
 import Agent.Bob.UserCommand.AgentCall (AgentCall)
 import Agent.Bob.UserCommand.ConfigShow (ConfigShow)
 import Agent.Bob.UserCommand.PermissionsShow (PermissionsShow)
+import Agent.Bob.UserCommand.Soul (Soul)
 
 -- | An existential over a user command type (not a value).
 data SomeUserCommand
@@ -20,5 +21,6 @@ baseUserCommands :: [SomeUserCommand]
 baseUserCommands =
   [ SomeUserCommand $ Proxy @ConfigShow
   , SomeUserCommand $ Proxy @PermissionsShow
+  , SomeUserCommand $ Proxy @Soul
   , SomeUserCommand $ Proxy @AgentCall
   ]
