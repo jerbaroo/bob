@@ -26,6 +26,24 @@ parseToolRequest name args =
     | toolName @t == name = Just $ Tool <$> Aeson.parseJSON @t args
     | otherwise           = Nothing
 
+-- | JSON Schema for a single tool request, as a discriminated union over the
+-- known tools.
+toolCallSchema :: Aeson.Value
+toolCallSchema = Aeson.object
+  [ ("oneOf", Aeson.toJSON
+      [ Aeson.object
+          [ ("type", "object")
+          , ("additionalProperties", Aeson.Bool False)
+          , ("required", Aeson.toJSON ["name", "arguments" :: Text])
+          , ("properties", Aeson.object
+              [ ("name", Aeson.object [("const", Aeson.toJSON (toolName @p))])
+              , ("arguments", toolArgsSchema @p)
+              ])
+          ]
+      | SomeTool (_ :: Proxy p) <- knownTools
+      ])
+  ]
+
 -- | Prompt descriptions for all known tools.
 toolDescriptions :: [Text]
 toolDescriptions =

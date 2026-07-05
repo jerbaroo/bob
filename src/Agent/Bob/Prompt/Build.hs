@@ -6,16 +6,19 @@ import Agent.Bob.Data.Message (Message(..))
 import Agent.Bob.Data.Role (Role(..))
 import Agent.Bob.Prelude
 import Agent.Bob.Prompt (ToPrompt(..))
-import Agent.Bob.Tool.Registry (toolDescriptions)
+import Agent.Bob.Tool.Registry (toolCallSchema, toolDescriptions)
 import Data.Aeson qualified as Aeson
 import Data.Text qualified as Text
 
 buildPrompt :: AgentInput -> Aeson.Value
 buildPrompt AgentInput{..} =
   Aeson.object
-    [ ("messages", Aeson.toJSON messages)
+    [ ("messages", Aeson.toJSON $ systemMessage : eventMessages)
     , ("model", Aeson.toJSON modelName)
-    , ("response_format", Aeson.object [("type", "json_object")])
+    , ("response_format", Aeson.object
+        [ ("type", "json_schema")
+        , ("schema", responseSchema)
+        ])
     , ("temperature", Aeson.toJSON modelTemperature)
     ]
  where
@@ -25,9 +28,6 @@ buildPrompt AgentInput{..} =
   -- messages are added.
   eventMessages :: [Message]
   eventMessages = reverse . catMaybes $ eventToMessage <$> events
-
-  messages :: [Message]
-  messages = systemMessage : eventMessages
 
   systemMessage :: Message
   systemMessage =
@@ -39,12 +39,11 @@ buildPrompt AgentInput{..} =
             , toPrompt tasks'
             ]
         responseFormatStr = Text.intercalate "\n"
-          [ "### RESPONSE FORMAT (CRITICAL)"
-          , "You must respond with a single, raw JSON object and nothing else."
-          , "It has two required keys and one optional key:"
+          [ "### RESPONSE FORMAT"
+          , "Your response is a single JSON object (its shape is enforced for you). Fill"
+          , "in its keys as follows:"
           , "- \"message\" (required): a string containing your conversational reply to the"
-          , "  user. Markdown IS allowed inside this string (code fences, lists, emphasis);"
-          , "  just ensure it is properly JSON-escaped."
+          , "  user. Markdown IS allowed inside this string (code fences, lists, emphasis)."
           , "- \"remaining_tasks\" (required): an array of strings: your up-to-date version of"
           , "  PENDING TASKS above. Maintain it actively: ADD new tasks (whether requested by"
           , "  the user or that you identify as needed to make progress), KEEP tasks that are"
@@ -57,12 +56,6 @@ buildPrompt AgentInput{..} =
           , ""
           , "Example of a valid response:"
           , "{\"remaining_tasks\": [\"Buy milk\", \"Call the dentist\"], \"message\": \"I've added those two tasks for you.\"}"
-          , ""
-          , "Strict rules for your response:"
-          , "- Output ONLY the JSON object: the first character of your response must be '{'"
-          , "  and the last character must be '}'."
-          , "- Do NOT wrap the object in Markdown code fences and do NOT include any text,"
-          , "  comments, or explanations outside it."
           ]
         availableToolsStr = Text.intercalate "\n"
           $ "### AVAILABLE TOOLS" : toolDescriptions
@@ -74,3 +67,22 @@ buildPrompt AgentInput{..} =
           , Just availableToolsStr
           ]
     in  Message {role=System, thinking=Nothing, ..}
+
+-- | JSON Schema for the model's response.
+responseSchema :: Aeson.Value
+responseSchema = Aeson.object
+  [ ("type", "object")
+  , ("additionalProperties", Aeson.Bool False)
+  , ("required", Aeson.toJSON ["message", "remaining_tasks" :: Text])
+  , ("properties", Aeson.object
+      [ ("message", Aeson.object [("type", "string")])
+      , ("remaining_tasks", Aeson.object
+          [ ("type", "array")
+          , ("items", Aeson.object [("type", "string")])
+          ])
+      , ("tool_calls", Aeson.object
+          [ ("type", "array")
+          , ("items", toolCallSchema)
+          ])
+      ])
+  ]

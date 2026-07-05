@@ -41,6 +41,19 @@ instance IsTool ReadFiles where
     render (path, Nothing) = "== " <> path <> " == (could not read)"
   runTool ReadFiles{..} =
     forM files \f -> (f,) <$> readFile (directory <> "/" <> f)
+  -- Mirrors 'Aeson.FromJSON': both fields are required.
+  toolArgsSchema = Aeson.object
+    [ ("type", "object")
+    , ("additionalProperties", Aeson.Bool False)
+    , ("required", Aeson.toJSON ["directory", "files" :: Text])
+    , ("properties", Aeson.object
+        [ ("directory", Aeson.object [("type", "string")])
+        , ("files", Aeson.object
+            [ ("type", "array")
+            , ("items", Aeson.object [("type", "string")])
+            ])
+        ])
+    ]
   toolDescription = Text.unlines
     [ "- ReadFiles: read the contents of one or more files within a directory."
     , "  Arguments: {\"directory\": \"<path>\", \"files\": [\"<name>\", ...]}"

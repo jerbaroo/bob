@@ -25,6 +25,8 @@ class Typeable t => IsTool t where
   renderOutput :: t -> ToolOutput t -> Text
   -- | Run a tool to produce a result.
   runTool :: (File :> es) => t -> Eff es (ToolOutput t)
+  -- | JSON Schema for this tool's @arguments@ object.
+  toolArgsSchema :: Aeson.Value
   -- | Human/model readable description injected into the prompt,
   toolDescription :: Text
 
