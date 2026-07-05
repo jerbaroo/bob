@@ -10,7 +10,7 @@ import Agent.Bob.Pretty (Pretty(..))
 import Witch (From(..), via)
 
 newtype UserInput = UserInput Text
-  deriving (Aeson.FromJSON, Aeson.ToJSON, From Text, IsString, Show)
+  deriving (Aeson.FromJSON, Aeson.ToJSON, Eq, From Text, IsString, Show)
 
 instance From String UserInput where
   from = via @Text
@@ -21,7 +21,7 @@ instance From UserInput String where
 instance From UserInput Text
 
 instance IsEvent UserInput where
-  eventName _ = "UserInput"
+  eventTasks _ = Nothing
   eventToMessage (UserInput text) =
     Just Message{content=text, role=User, thinking=Nothing}
 

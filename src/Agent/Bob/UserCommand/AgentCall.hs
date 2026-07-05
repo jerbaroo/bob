@@ -5,7 +5,7 @@ import Data.Aeson qualified as Aeson
 import Data.Text (Text)
 import Agent.Bob.Command (IsCommand(..), recordEvents, step)
 import Agent.Bob.Command.CallAgent qualified as CallAgent
-import Agent.Bob.Data.AgentOutput (AgentOutput(..))
+import Agent.Bob.Data.AgentOutput (AgentMessageContent(..), AgentOutput(..))
 import Agent.Bob.Data.Event (IsEvent(..))
 import Agent.Bob.Data.Level (Level(..))
 import Agent.Bob.Data.Role (Role(..))
@@ -22,37 +22,38 @@ import Witch (from, into)
 -- must be tried last.
 newtype AgentCall = AgentCall UserInput
 
-instance IsUserCommand AgentCall where
-  parseUserCommand = Just . AgentCall
-  userCommandDescription =
-    "Send the input to the agent and run any tools it requests."
-  userCommandName = []
+instance Aeson.ToJSON AgentCall where
+  toJSON (AgentCall userInput) =
+    Aeson.object [("user_input", Aeson.toJSON userInput)]
 
 instance IsCommand AgentCall where
   type Result AgentCall = ()
-  runCommand agentId (AgentCall userInput) = do
-    agentOutput <- step agentId $ CallAgent.UserCall userInput
+  runCommand agentId (AgentCall _userInput) = do
+    agentOutput <- step agentId CallAgent.CallAgent
     drainTools agentOutput
     pure ((), [])
    where
     -- Run the tools the model requested, record their outputs as events, and
-    -- feed the results back to the model, repeating until it stops requesting
-    -- tools. The original user input is kept unchanged for the whole drain.
-    drainTools output = case output.toolRequests of
+    -- call the agent again, repeating until it stops requesting tools. The
+    -- user input is already recorded as an event, so each call sees it.
+    drainTools output = case output.agentMessageContent.toolRequests of
       []    -> pure ()
       tools -> do
         outcomes <- forM tools \tool -> do
           checkPermission tool
           toolOutput <- runToolForModel tool
           writeSection System Info $ into @Text (toolName' tool) <> " tool output:\n" <> toolOutput
-          pure $ ToolResult tool toolOutput
+          pure $ ToolResult (toolName' tool) toolOutput
         recordEvents agentId $ from <$> outcomes
-        output' <- step agentId $ CallAgent.ToolResults userInput outcomes
+        output' <- step agentId CallAgent.CallAgent
         drainTools output'
 
-instance Aeson.ToJSON AgentCall where
-  toJSON (AgentCall userInput) =
-    Aeson.object [("user_input", Aeson.toJSON userInput)]
-
 instance IsEvent AgentCall where
-  eventName _ = "AgentCall"
+  eventTasks _ = Nothing
+  eventToMessage _ = Nothing
+
+instance IsUserCommand AgentCall where
+  parseUserCommand = Just . AgentCall
+  userCommandDescription =
+    "Send the input to the agent and run any tools it requests."
+  userCommandName = []

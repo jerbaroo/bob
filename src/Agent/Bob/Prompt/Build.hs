@@ -1,15 +1,14 @@
 module Agent.Bob.Prompt.Build where
 
 import Data.Aeson qualified as Aeson
-import Data.Either.Extra (eitherToMaybe)
 import Data.Maybe (catMaybes)
 import Data.Text qualified as Text
 import Agent.Bob.Data.AgentInput (AgentInput(..))
+import Agent.Bob.Data.Event (eventToMessage)
 import Agent.Bob.Data.Message (Message(..))
 import Agent.Bob.Data.Role (Role(..))
 import Agent.Bob.Prompt (ToPrompt(..))
 import Agent.Bob.Tool.Registry (toolDescriptions)
-import Witch (tryInto)
 
 buildPrompt :: AgentInput -> Aeson.Value
 buildPrompt AgentInput{..} =
@@ -21,31 +20,14 @@ buildPrompt AgentInput{..} =
     ]
  where
   -- Events are stored newest-first; reverse into chronological order. The
-  -- current user input is among them ('UserInput' is recorded before the
-  -- agent is called), so no separate user message is added.
+  -- current user input and any tool results are among them ('UserInput' and
+  -- 'ToolResult' are recorded before the agent is called), so no separate
+  -- messages are added.
   eventMessages :: [Message]
-  eventMessages = reverse . catMaybes $ eitherToMaybe . tryInto @Message <$> events
+  eventMessages = reverse . catMaybes $ eventToMessage <$> events
 
   messages :: [Message]
-  messages = systemMessage : eventMessages <> toolResultMessages
-
-  -- Tool results are appended as a fresh message so the original user input
-  -- (above) stays intact for the whole tool-drain loop.
-  toolResultMessages :: [Message]
-  toolResultMessages = case toolResults of
-    [] -> []
-    results ->
-      [ Message
-          { role = User
-          , thinking = Nothing
-          , content =
-              "The tools you requested have completed. Each result below is\
-              \ wrapped in a <tool_result> tag naming the tool that produced\
-              \ it. Use the results to continue, responding in the usual JSON\
-              \ format.\n\n"
-              <> Text.intercalate "\n\n" (toPrompt <$> results)
-          }
-      ]
+  messages = systemMessage : eventMessages
 
   systemMessage :: Message
   systemMessage =

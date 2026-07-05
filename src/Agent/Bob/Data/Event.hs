@@ -3,10 +3,12 @@
 module Agent.Bob.Data.Event where
 
 import Data.Aeson qualified as Aeson
+import Data.Proxy (Proxy(..))
 import Data.Text (Text)
+import Data.Typeable (Typeable, typeRep)
 import Agent.Bob.Data.Task (Task)
 import Agent.Bob.Data.Message (Message)
-import Witch (From(..), TryFrom(..), maybeTryFrom)
+import Witch (From(..))
 
 data Event = forall e. (Aeson.ToJSON e, IsEvent e) => Event e
 
@@ -26,15 +28,11 @@ instance Aeson.ToJSON Event where
 
 -- | Something that has happened.
 class IsEvent e where
-  -- TODO avoid parameter 'e'.
-  eventName :: e -> Text -- TODO use Typeable?
+  eventName :: e -> Text
+  default eventName :: Typeable e => e -> Text
+  eventName _ = from $ show $ typeRep (Proxy @e)
+  -- | Updated list of tasks for the harness state.
   eventTasks :: e -> Maybe [Task]
-  eventTasks _ = Nothing
+  -- | How the event appears in the model's context; no default so a new
+  -- event type must decide explicitly whether the model sees it.
   eventToMessage :: e -> Maybe Message
-  eventToMessage _ = Nothing
-
-instance IsEvent e => TryFrom e Message where
-  tryFrom = maybeTryFrom eventToMessage
-
-instance IsEvent e => TryFrom e [Task] where
-  tryFrom = maybeTryFrom eventTasks

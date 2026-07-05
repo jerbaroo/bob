@@ -12,6 +12,8 @@ newtype Resolution = Resolution Text
 instance From String Resolution where
   from = via @Text
 
+instance From Resolution Text
+
 instance IsString Resolution where
   fromString = from
 

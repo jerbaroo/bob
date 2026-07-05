@@ -55,8 +55,10 @@ recordEvents
 recordEvents agentId newEvents = do
   modify $ \HarnessState{..} -> HarnessState
     { events =
-        let f Nothing = Just newEvents
-            f (Just events') = Just $ newEvents <> events'
+        -- 'newEvents' arrives in chronological order; the stored list is
+        -- newest-first, so reverse the batch before prepending.
+        let f Nothing = Just $ reverse newEvents
+            f (Just events') = Just $ reverse newEvents <> events'
         in Map.alter f agentId events
     , tasks = maybe tasks (Map.singleton agentId) $
         eventTasks =<< lastMay newEvents

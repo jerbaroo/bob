@@ -14,11 +14,8 @@ import Agent.Bob.UserCommand (IsUserCommand(..))
 -- | Print the current configuration to the console: @/config show@.
 data ConfigShow = ConfigShow
 
-instance IsUserCommand ConfigShow where
-  mkUserCommand [] = Just ConfigShow
-  mkUserCommand _ = Nothing
-  userCommandDescription = "Print the current configuration."
-  userCommandName = ["/config", "show"]
+instance Aeson.ToJSON ConfigShow where
+  toJSON ConfigShow = "ConfigShow"
 
 instance IsCommand ConfigShow where
   type Result ConfigShow = ()
@@ -27,8 +24,12 @@ instance IsCommand ConfigShow where
     writeSection System Info $ pretty config
     pure ((), [])
 
-instance Aeson.ToJSON ConfigShow where
-  toJSON ConfigShow = Aeson.String "ConfigShow"
-
 instance IsEvent ConfigShow where
-  eventName _ = "ConfigShow"
+  eventTasks _ = Nothing
+  eventToMessage _ = Nothing
+
+instance IsUserCommand ConfigShow where
+  mkUserCommand [] = Just ConfigShow
+  mkUserCommand _ = Nothing
+  userCommandDescription = "Print the current configuration."
+  userCommandName = ["/config", "show"]

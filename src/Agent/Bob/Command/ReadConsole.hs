@@ -18,4 +18,5 @@ instance Aeson.ToJSON ReadConsole where
   toJSON ReadConsole = Aeson.String "ReadConsole"
 
 instance IsEvent ReadConsole where
-  eventName _ = "ReadConsole"
+  eventTasks _ = Nothing
+  eventToMessage _ = Nothing

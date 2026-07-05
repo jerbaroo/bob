@@ -18,27 +18,28 @@ import Agent.Bob.UserCommand.Registry.Base (SomeUserCommand(..), baseUserCommand
 -- | Print a short description of every user command: @/help@.
 data Help = Help
 
+instance Aeson.ToJSON Help where
+  toJSON Help = "Help"
+
+instance IsCommand Help where
+  type Result Help = ()
+  runCommand _agentId Help = do
+    writeSection System Info $ pretty helpEntries
+    pure ((), [])
+
+instance IsEvent Help where
+  eventTasks _ = Nothing
+  eventToMessage _ = Nothing
+
 instance IsUserCommand Help where
   mkUserCommand [] = Just Help
   mkUserCommand _ = Nothing
   userCommandDescription = "Print a short description of every user command."
   userCommandName = ["/help"]
 
-instance IsCommand Help where
-  type Result Help = ()
-  runCommand _agentId Help = do
-    writeSection System Info helpText
-    pure ((), [])
-
-instance Aeson.ToJSON Help where
-  toJSON Help = Aeson.String "Help"
-
-instance IsEvent Help where
-  eventName _ = "Help"
-
 -- | Name and description of every user command, alphabetical by name. 'Help'
--- itself cannot appear in 'baseUserCommands' (an import cycle), so it is added
--- here.
+-- itself cannot appear in 'baseUserCommands' (due to an import cycle), so it is
+-- added here.
 helpEntries :: [(Text, Text)]
 helpEntries =
     sortOn fst
@@ -49,8 +50,3 @@ helpEntries =
   entry (SomeUserCommand (_ :: Proxy c)) =
     (userCommandName @c, userCommandDescription @c)
   helpEntry = (userCommandName @Help, userCommandDescription @Help)
-
--- | One block per command: its name, then its description in a column that
--- starts after the longest name and wraps at 'wrapWidth' characters.
-helpText :: Text
-helpText = pretty helpEntries

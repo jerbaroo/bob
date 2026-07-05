@@ -192,5 +192,9 @@ test-suite agent-bob-test
 
     -- Test dependencies.
     build-depends:
+        QuickCheck,
+        aeson,
+        agent-bob,
         base,
-        agent-bob
+        hspec,
+        text

@@ -9,6 +9,7 @@ import Data.Text (Text)
 import Data.Typeable (Typeable, typeRep)
 import Agent.Bob.Data.AgentOutput (AgentOutput)
 import Agent.Bob.Data.Event (Event, IsEvent)
+import Agent.Bob.Data.ToolResult (ToolResult)
 import Agent.Bob.Data.UserInput (UserInput)
 import Witch (from)
 
@@ -23,6 +24,7 @@ data SomeEvent
 knownEvents :: [SomeEvent]
 knownEvents =
   [ SomeEvent $ Proxy @AgentOutput
+  , SomeEvent $ Proxy @ToolResult
   , SomeEvent $ Proxy @UserInput
   ]
 

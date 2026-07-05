@@ -15,11 +15,8 @@ import Agent.Bob.UserCommand (IsUserCommand(..))
 -- | Print the granted permissions to the console: @/permissions show@.
 data PermissionsShow = PermissionsShow
 
-instance IsUserCommand PermissionsShow where
-  mkUserCommand [] = Just PermissionsShow
-  mkUserCommand _ = Nothing
-  userCommandDescription = "Print the granted permissions."
-  userCommandName = ["/permissions", "show"]
+instance Aeson.ToJSON PermissionsShow where
+  toJSON PermissionsShow = "PermissionsShow"
 
 instance IsCommand PermissionsShow where
   type Result PermissionsShow = ()
@@ -31,8 +28,12 @@ instance IsCommand PermissionsShow where
         <> pretty (((.toolName) &&& (.param)) <$> permissions)
     pure ((), [])
 
-instance Aeson.ToJSON PermissionsShow where
-  toJSON PermissionsShow = Aeson.String "PermissionsShow"
-
 instance IsEvent PermissionsShow where
-  eventName _ = "PermissionsShow"
+  eventTasks _ = Nothing
+  eventToMessage _ = Nothing
+
+instance IsUserCommand PermissionsShow where
+  mkUserCommand [] = Just PermissionsShow
+  mkUserCommand _ = Nothing
+  userCommandDescription = "Print the granted permissions."
+  userCommandName = ["/permissions", "show"]
