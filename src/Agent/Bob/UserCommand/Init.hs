@@ -6,8 +6,8 @@ import Agent.Bob.Data.Event (IsEvent(..))
 import Agent.Bob.Data.Level (Level(..))
 import Agent.Bob.Data.Role (Role(..))
 import Agent.Bob.Effect.Console (writeSection)
-import Agent.Bob.Effect.File (readFile, writeFile)
-import Agent.Bob.Prelude hiding (readFile, writeFile)
+import Agent.Bob.Effect.File (File, appendFile, readFile, writeFile)
+import Agent.Bob.Prelude hiding (appendFile, readFile, writeFile)
 import Agent.Bob.Pretty (pretty)
 import Agent.Bob.Soul (defaultSoul)
 import Agent.Bob.UserCommand (IsUserCommand(..))
@@ -35,8 +35,30 @@ instance IsCommand Init where
         Nothing -> do
           writeFile path contents
           pure $ "Created " <> path <> "."
-    writeSection System Info $ Text.intercalate "\n" reports
+    gitignoreReport <- initGitignore
+    writeSection System Info $
+      Text.intercalate "\n" $ reports <> [gitignoreReport]
     pure ((), [])
+
+-- | Session logs are per-branch working history, not something to commit:
+-- make sure the project's .gitignore covers the memory directory.
+initGitignore :: File :> es => Eff es Text
+initGitignore = readFile gitignorePath >>= \case
+  Just content
+    | gitignoreEntry `elem` (Text.strip <$> Text.lines content) ->
+        pure $ "Kept " <> gitignorePath
+          <> " (already ignores " <> gitignoreEntry <> ")."
+    | otherwise -> do
+        let separator = if "\n" `Text.isSuffixOf` content then "" else "\n"
+        appendFile gitignorePath $ separator <> gitignoreEntry <> "\n"
+        pure $ "Added " <> gitignoreEntry <> " to " <> gitignorePath <> "."
+  Nothing -> do
+    writeFile gitignorePath $ gitignoreEntry <> "\n"
+    pure $ "Created " <> gitignorePath
+      <> " (ignoring " <> gitignoreEntry <> ")."
+ where
+  gitignorePath = ".gitignore"
+  gitignoreEntry = "agent-bob/memory/"
 
 instance IsEvent Init where
   eventTasks _ = Nothing

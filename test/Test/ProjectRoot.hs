@@ -1,7 +1,7 @@
 module Test.ProjectRoot (spec) where
 
 import Agent.Bob.Prelude
-import Agent.Bob.ProjectRoot (findProjectRootBy)
+import Agent.Bob.ProjectRoot (findProjectRootBy, keyFromHead, parseHead)
 import Data.Functor.Identity (Identity(..))
 import Test.Hspec (Spec, describe, it, shouldBe)
 
@@ -26,3 +26,24 @@ spec = describe "findProjectRootBy" $ do
 
   it "terminates at the filesystem root" $
     walk [] "/" `shouldBe` Nothing
+
+  describe "parseHead" $ do
+    it "parses a symbolic ref to the branch name" $
+      parseHead "ref: refs/heads/main\n" `shouldBe` Just "main"
+
+    it "keeps slashes in branch names" $
+      parseHead "ref: refs/heads/feature/foo\n" `shouldBe` Just "feature/foo"
+
+    it "parses a detached HEAD to the short SHA" $
+      parseHead "0123456789abcdef0123456789abcdef01234567\n"
+        `shouldBe` Just "0123456"
+
+    it "rejects junk" $
+      parseHead "\n" `shouldBe` Nothing
+
+  describe "keyFromHead" $ do
+    it "sanitises slashes for use as a filename" $
+      keyFromHead (Just "feature/foo") `shouldBe` "feature-foo"
+
+    it "falls back to default outside a repository" $
+      keyFromHead Nothing `shouldBe` "default"
