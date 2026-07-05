@@ -12,18 +12,24 @@ data File :: Effect where
   ResolvePath :: Text -> File f Text
 makeEffectF ''File
 
-runFile :: (Emb IO :> es) => Eff (File : es) ~> Eff es
-runFile = interpret \case
+-- | Interpret file operations with paths resolved against the given project
+-- root (see 'resolve').
+runFile :: (Emb IO :> es) => FilePath -> Eff (File : es) ~> Eff es
+runFile root = interpret \case
   ReadFile filePath -> liftIO do
-    expandedPath <- expandTilde $ from filePath
-    result <- try @IOException $ IO.readFile (from expandedPath)
+    path <- resolve root $ from filePath
+    result <- try @IOException $ IO.readFile path
     pure $ either (const Nothing) (Just . from) result
   AppendFile filePath content -> liftIO do
-    expandedPath <- expandTilde $ from filePath
-    createDirectoryIfMissing True $ takeDirectory expandedPath
-    IO.appendFile expandedPath $ from content
-  ResolvePath filePath -> liftIO $
-    from <$> (expandTilde (from filePath) >>= makeAbsolute)
+    path <- resolve root $ from filePath
+    createDirectoryIfMissing True $ takeDirectory path
+    IO.appendFile path $ from content
+  ResolvePath filePath -> liftIO $ from <$> resolve root (from filePath)
+
+-- | Expand a leading tilde, then interpret relative paths against the project
+-- root rather than the CWD ('</>' keeps its second argument when absolute).
+resolve :: FilePath -> FilePath -> IO FilePath
+resolve root path = expandTilde path >>= makeAbsolute . (root </>)
 
 -- | Expands a leading tilde (~) in a filepath to the user's home directory.
 expandTilde :: FilePath -> IO FilePath

@@ -16,8 +16,10 @@ import Agent.Bob.Effect.Console (runConsole, writeSection)
 import Agent.Bob.Effect.File (readFile, runFile)
 import Agent.Bob.Pretty (Pretty(..))
 import Agent.Bob.UserCommand.Registry (parseCommand)
+import Control.Monad (filterM)
 import Data.Effect.State (evalStateIORef)
 import Data.Map qualified as Map
+import Data.Maybe (isNothing)
 import Data.Text qualified as Text
 
 -- | Restore the session from the persisted event log, so the model starts
@@ -38,6 +40,16 @@ restoreSession agentId = do
   writeSection System Meta $
     "Restored " <> pretty (length restored) <> " events."
 
+-- | Point the user at @/init@ when any referenced config file is missing.
+checkInitFiles :: Harness es => Eff es ()
+checkInitFiles = do
+  Config{configPath, permissionsPath, soulPath} <- ask
+  let paths = catMaybes [Just configPath, Just permissionsPath, soulPath]
+  missing <- filterM (fmap isNothing . readFile) paths
+  unless (null missing) $ writeSection System Info $
+       "Missing config files: " <> Text.intercalate ", " missing
+    <> ".\nRun /init to create them with default contents."
+
 -- | The main agentic loop: read user input, parse it into a command, execute.
 run :: Harness es => AgentId -> Eff es ()
 run agentId = do
@@ -50,8 +62,9 @@ main :: IO ()
 main = do
   config <- loadConfig
   let initialState = mkHarnessState config
-  runEff . runAsk config . runAgent . runConsole . runFile . evalStateIORef initialState $ do
+  runEff . runAsk config . runAgent . runConsole . runFile (from config.projectRoot) . evalStateIORef initialState $ do
     writeSection System Info $ "Hi. I'm Bob. Type /help for assistance.\n\n" <> pretty config
+    checkInitFiles
     let agentId = AgentId 0
     restoreSession agentId
     run agentId

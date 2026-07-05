@@ -9,9 +9,14 @@ import Data.Aeson ((.:?))
 import Data.Aeson qualified as Aeson
 import Data.Functor.Identity (Identity)
 
--- | Where the config file is read from unless @--config-path@ overrides it.
+-- | The machine-wide config file: the lowest-precedence file source.
+globalConfigPath :: Text
+globalConfigPath = "~/.config/agent-bob/config.json"
+
+-- | Where the project config file is read from (relative to the project
+-- root) unless @--config-path@ overrides it. It overrides the global file.
 defaultConfigPath :: Text
-defaultConfigPath = "~/.config/agent-bob/config.json"
+defaultConfigPath = "agent-bob/config.json"
 
 -- | Higher-kinded field wrapper.
 type family HKD f a where

@@ -11,8 +11,8 @@ partialConfig :: Parser PartialConfig
 partialConfig = Config
   <$> optional (strOption
         ( long "config-path" <> metavar "PATH"
-       <> help (   "JSON config file to read (default "
-                <> from defaultConfigPath <> ")") ))
+       <> help (   "Project JSON config file to read (default "
+                <> from defaultConfigPath <> ", relative to the project root)") ))
   <*> optional (strOption
         ( long "engine-url" <> metavar "URL"
        <> help "Chat-completions endpoint" ))
@@ -47,7 +47,7 @@ parserInfo :: ParserInfo PartialConfig
 parserInfo = info (partialConfig <**> helper)
   ( fullDesc
  <> header "agent-bob - a minimal agent harness"
- <> progDesc "Flags override the config file, which overrides the defaults." )
+ <> progDesc "Flags override the project config file, which overrides the global config file, which overrides the defaults." )
 
 -- | 'parseLevel' adapted to optparse's 'String'-based reader.
 readLevel :: String -> Either String Level

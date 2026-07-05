@@ -77,10 +77,14 @@ spec = describe "config parsers" $ do
   it "rejects an unknown log level in the config file" $
     isLeft (File.parseConfig "{\"log_level\": \"nope\"}") `shouldBe` True
 
-  it "precedence is CLI > file > default" $ do
+  it "precedence is CLI > project file > global file > default" $ do
     cli <- cliPartial ["--model-name", "Cli"]
-    file <- filePartial "{\"model_name\": \"File\", \"engine_url\": \"file-engine\"}"
-    let config = applyPartial (cli <> file) baseConfig
-    -- CLI wins for model_name; file fills engine_url; default keeps the rest.
-    (config.modelName, config.engineUrl, config.permissionsPath)
-      `shouldBe` ("Cli", "file-engine", "default-perms")
+    project <- filePartial
+      "{\"model_name\": \"Project\", \"engine_url\": \"project-engine\"}"
+    global <- filePartial $ "{\"model_name\": \"Global\","
+      <> "\"engine_url\": \"global-engine\", \"memory_path\": \"global-mem\"}"
+    let config = applyPartial (cli <> project <> global) baseConfig
+    -- CLI wins for model_name; the project file beats the global file for
+    -- engine_url; the global file fills memory_path; default keeps the rest.
+    (config.modelName, config.engineUrl, config.memoryPath, config.permissionsPath)
+      `shouldBe` ("Cli", "project-engine", "global-mem", "default-perms")

@@ -2,7 +2,7 @@ module Agent.Bob.Config where
 
 import Agent.Bob.Config.Cli qualified as Cli
 import Agent.Bob.Config.File qualified as File
-import Agent.Bob.Data.Config (Config, ConfigF(..), applyPartial, defaultConfigPath)
+import Agent.Bob.Data.Config (Config, ConfigF(..), applyPartial, defaultConfigPath, globalConfigPath)
 import Agent.Bob.Data.Level (Level(..))
 import Agent.Bob.Effect.File (readFile, runFile)
 import Agent.Bob.Prelude hiding (readFile)
@@ -13,8 +13,9 @@ import System.Directory (getCurrentDirectory)
 import System.Exit (die)
 import System.FilePath ((</>))
 
--- | The default config, overridden by the config file, overridden by the CLI.
--- Takes the project root (see 'findProjectRoot') and the CWD.
+-- | The defaults, overridden by the config files, overridden by the CLI.
+-- Takes the project root (see 'findProjectRoot') and the CWD. Relative paths
+-- are resolved against the project root by the File effect.
 defaultConfig :: FilePath -> FilePath -> Config
 defaultConfig root cwd = Config
   { configPath = defaultConfigPath
@@ -23,29 +24,31 @@ defaultConfig root cwd = Config
   , memoryPath = sessionPath cwd
   , modelName = "Qwen"
   , modelTemperature = 0.5
-  , permissionsPath = "~/.agent-bob/permissions"
+  , permissionsPath = from $ projectDir </> "permissions"
   , projectRoot = from root
-  , soulPath = Just $ from $ root </> projectDir </> "SOUL.md"
+  , soulPath = Just $ from $ projectDir </> "SOUL.md"
   , timeoutSeconds = 10 * 60 -- 10 minutes.
   }
 
--- | Read the effective configuration with the precedence CLI > file > default.
--- CLI flags are parsed first: they take precedence and also choose which config
--- file to read (--config-path).
+-- | Read the effective configuration with the precedence
+-- CLI > project file > global file > default.
 loadConfig :: IO Config
 loadConfig = do
   cwd <- getCurrentDirectory
   -- Not inside a git repository: treat the CWD as the project root.
   root <- fromMaybe cwd <$> findProjectRoot cwd
   cliPartial <- execParser Cli.parserInfo
-  let cfgFilePath = fromMaybe defaultConfigPath cliPartial.configPath
-  -- Reuse the File effect so the config path gets the same tilde-expansion and
-  -- missing-file handling (Nothing) as everything else.
-  rawConfig <- runEff . runFile $ readFile cfgFilePath
-  filePartial <- either (die . Text.unpack) pure $
-    maybe (Right mempty) File.parseConfig rawConfig
-  -- Precedence: CLI > file > default.
-  pure $ applyPartial (cliPartial <> filePartial) $ defaultConfig root cwd
+  -- Reuse the File effect so config paths get the same tilde-expansion,
+  -- root-relative resolution and missing-file handling as everything else.
+  let readPartial path = do
+        rawConfig <- runEff . runFile root $ readFile path
+        either (die . Text.unpack) pure $
+          maybe (Right mempty) File.parseConfig rawConfig
+  globalPartial <- readPartial globalConfigPath
+  projectPartial <- readPartial $
+    fromMaybe defaultConfigPath cliPartial.configPath
+  pure $ applyPartial (cliPartial <> projectPartial <> globalPartial) $
+    defaultConfig root cwd
 
 -- | Sessions are stored centrally but keyed by the directory the tool is
 -- started from, so each project keeps its own history.
