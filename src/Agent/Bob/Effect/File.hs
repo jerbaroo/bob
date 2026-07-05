@@ -10,6 +10,7 @@ data File :: Effect where
   AppendFile  :: Text -> Text -> File f ()
   ReadFile    :: Text -> File f (Maybe Text)
   ResolvePath :: Text -> File f Text
+  WriteFile   :: Text -> Text -> File f ()
 makeEffectF ''File
 
 -- | Interpret file operations with paths resolved against the given project
@@ -25,6 +26,10 @@ runFile root = interpret \case
     createDirectoryIfMissing True $ takeDirectory path
     IO.appendFile path $ from content
   ResolvePath filePath -> liftIO $ from <$> resolve root (from filePath)
+  WriteFile filePath content -> liftIO do
+    path <- resolve root $ from filePath
+    createDirectoryIfMissing True $ takeDirectory path
+    IO.writeFile path $ from content
 
 -- | Expand a leading tilde, then interpret relative paths against the project
 -- root rather than the CWD ('</>' keeps its second argument when absolute).

@@ -7,6 +7,7 @@ import Agent.Bob.Prelude
 import Agent.Bob.UserCommand (IsUserCommand)
 import Agent.Bob.UserCommand.AgentCall (AgentCall)
 import Agent.Bob.UserCommand.ConfigShow (ConfigShow)
+import Agent.Bob.UserCommand.Init (Init)
 import Agent.Bob.UserCommand.PermissionsShow (PermissionsShow)
 import Agent.Bob.UserCommand.Soul (Soul)
 
@@ -20,6 +21,7 @@ data SomeUserCommand
 baseUserCommands :: [SomeUserCommand]
 baseUserCommands =
   [ SomeUserCommand $ Proxy @ConfigShow
+  , SomeUserCommand $ Proxy @Init
   , SomeUserCommand $ Proxy @PermissionsShow
   , SomeUserCommand $ Proxy @Soul
   , SomeUserCommand $ Proxy @AgentCall

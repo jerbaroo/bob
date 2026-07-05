@@ -96,6 +96,7 @@ library
                     , Agent.Bob.ProjectRoot
                     , Agent.Bob.Prompt
                     , Agent.Bob.Prompt.Build
+                    , Agent.Bob.Soul
                     , Agent.Bob.Tool
                     , Agent.Bob.Tool.ReadFiles
                     , Agent.Bob.Tool.Registry
@@ -103,6 +104,7 @@ library
                     , Agent.Bob.UserCommand.AgentCall
                     , Agent.Bob.UserCommand.ConfigShow
                     , Agent.Bob.UserCommand.Help
+                    , Agent.Bob.UserCommand.Init
                     , Agent.Bob.UserCommand.PermissionsShow
                     , Agent.Bob.UserCommand.Registry
                     , Agent.Bob.UserCommand.Registry.Base
