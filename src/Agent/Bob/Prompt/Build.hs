@@ -40,42 +40,47 @@ buildPrompt AgentInput{..} =
           , thinking = Nothing
           , content =
               "The tools you requested have completed. Each result below is\
-              \ labelled with the tool that produced it; use them to continue."
-              <> toPrompt results
+              \ wrapped in a <tool_result> tag naming the tool that produced\
+              \ it. Use the results to continue, responding in the usual JSON\
+              \ format.\n\n"
+              <> Text.intercalate "\n\n" (toPrompt <$> results)
           }
       ]
 
   systemMessage :: Message
   systemMessage =
     let personaStr = "You are an intelligent assistant responsible for tracking tasks and conversing with the user. The task list is your working memory: use it to keep structure about what you are doing and plan to do."
-        tasksStr [] = "You currently have no pending tasks."
-        tasksStr tasks' =
-             "The following tasks are currently pending. Consider the user's input and decide which remain:\n"
-          <> toPrompt tasks'
-        responseFormatStr = Text.unlines
-          [ "### CRITICAL INSTRUCTION: OUTPUT FORMAT"
+        tasksStr tasks' = Text.intercalate "\n" $ "### PENDING TASKS" : case tasks' of
+          [] -> ["None."]
+          _  ->
+            [ "Consider the user's input and decide which of these remain:"
+            , toPrompt tasks'
+            ]
+        responseFormatStr = Text.intercalate "\n"
+          [ "### RESPONSE FORMAT (CRITICAL)"
           , "You must respond with a single, raw JSON object and nothing else."
-          , "The object has exactly two keys:"
-          , "- \"remaining_tasks\": an array of strings representing your up-to-date task list."
-          , "  Maintain it actively: ADD new tasks (whether requested by the user or that you"
-          , "  identify as needed to make progress), KEEP tasks that are still pending, and REMOVE"
-          , "  tasks that are now complete or no longer relevant. Use an empty array [] when nothing remains."
-          , "- \"message\": a string containing your conversational reply to the user."
-          , "- \"tool_calls\" (optional): an array of tool requests. Include it ONLY when you"
-          , "  want to run a tool; each element is {\"name\": \"<ToolName>\", \"arguments\": {...}}."
-          , "  When you request tools you will be called again with their results as the next input."
-          , "  See AVAILABLE TOOLS below for what you may request."
+          , "It has two required keys and one optional key:"
+          , "- \"message\" (required): a string containing your conversational reply to the"
+          , "  user. Markdown IS allowed inside this string (code fences, lists, emphasis);"
+          , "  just ensure it is properly JSON-escaped."
+          , "- \"remaining_tasks\" (required): an array of strings: your up-to-date version of"
+          , "  PENDING TASKS above. Maintain it actively: ADD new tasks (whether requested by"
+          , "  the user or that you identify as needed to make progress), KEEP tasks that are"
+          , "  still pending, and REMOVE tasks that are now complete or no longer relevant."
+          , "  Use an empty array [] when nothing remains."
+          , "- \"tool_calls\" (optional): an array of tool requests, each of the form"
+          , "  {\"name\": \"<ToolName>\", \"arguments\": {...}}. Include it ONLY when you need a"
+          , "  tool to make progress; you will be called again with the results as the next"
+          , "  input. Only the tools listed under AVAILABLE TOOLS below may be requested."
           , ""
           , "Example of a valid response:"
           , "{\"remaining_tasks\": [\"Buy milk\", \"Call the dentist\"], \"message\": \"I've added those two tasks for you.\"}"
           , ""
           , "Strict rules for your response:"
-          , "- Output ONLY the JSON object. Do not include any text before or after it."
-          , "- Do NOT wrap the JSON object itself in Markdown code fences (no ``` or ```json around the object)."
-          , "- Do NOT include comments or explanations outside the JSON object."
-          , "- The first character of your response must be '{' and the last character must be '}'."
-          , "- Both \"remaining_tasks\" and \"message\" keys are required; \"tool_calls\" is optional."
-          , "- Markdown IS allowed inside the \"message\" string value (e.g. you may use code fences, lists, or emphasis within your reply); just ensure it is properly JSON-escaped as a string."
+          , "- Output ONLY the JSON object: the first character of your response must be '{'"
+          , "  and the last character must be '}'."
+          , "- Do NOT wrap the object in Markdown code fences and do NOT include any text,"
+          , "  comments, or explanations outside it."
           ]
         availableToolsStr = Text.intercalate "\n"
           $ "### AVAILABLE TOOLS" : toolDescriptions

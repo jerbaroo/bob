@@ -22,5 +22,10 @@ instance Aeson.ToJSON ToolResult where
 instance IsEvent ToolResult where
   eventName _ = "ToolResult"
 
+-- | A delimited block, so multi-line output can't be confused with
+-- surrounding prompt text.
 instance ToPrompt ToolResult where
-  toPrompt ToolResult{..} = into @Text (toolName' tool) <> ":\n" <> output
+  toPrompt ToolResult{..} =
+    "<tool_result tool=\"" <> into @Text (toolName' tool) <> "\">\n"
+      <> output
+      <> "\n</tool_result>"
