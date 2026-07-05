@@ -1,7 +1,7 @@
 module Agent.Bob.Data.Role where
 
+import Agent.Bob.Prelude
 import Data.Aeson qualified as Aeson
-import Witch (from)
 
 data Role = Assistant | System | User
   deriving stock (Eq, Show)

@@ -1,15 +1,6 @@
 module Agent.Bob where
 
-import Control.Monad (void)
-import Control.Monad.Extra (whenJust)
-import Control.Monad.Hefty (Eff, runEff)
-import Data.Effect.Reader (asks, runAsk)
-import Data.Effect.State (evalStateIORef, modify)
-import Data.Map qualified as Map
-import Data.Maybe (mapMaybe)
-import Data.Text (Text)
-import Data.Text qualified as Text
-import Prelude hiding (readFile)
+import Agent.Bob.Prelude hiding (readFile)
 import Agent.Bob.Command (Command(..), Harness, step)
 import Agent.Bob.Command.ReadConsole (ReadConsole(..))
 import Agent.Bob.Data.AgentId (AgentId(..))
@@ -24,9 +15,10 @@ import Agent.Bob.Effect.Console (runConsole, writeSection)
 import Agent.Bob.Effect.File (readFile, runFile)
 import Agent.Bob.Pretty (Pretty(..))
 import Agent.Bob.UserCommand.Registry (parseCommand)
-import Safe (lastMay)
+import Data.Effect.State (evalStateIORef)
+import Data.Map qualified as Map
+import Data.Text qualified as Text
 import System.Directory (getCurrentDirectory)
-import Witch (from)
 
 -- | Restore the session from the persisted event log, so the model starts
 -- with the context of previous runs instead of starting fresh. Lines that

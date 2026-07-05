@@ -1,13 +1,13 @@
 module Agent.Bob.UserCommand.ConfigShow where
 
 import Data.Aeson qualified as Aeson
-import Data.Effect.Reader (ask)
 import Agent.Bob.Command (IsCommand(..))
 import Agent.Bob.Data.Config (Config)
 import Agent.Bob.Data.Event (IsEvent(..))
 import Agent.Bob.Data.Level (Level(..))
 import Agent.Bob.Data.Role (Role(..))
 import Agent.Bob.Effect.Console (writeSection)
+import Agent.Bob.Prelude
 import Agent.Bob.Pretty (Pretty(..))
 import Agent.Bob.UserCommand (IsUserCommand(..))
 

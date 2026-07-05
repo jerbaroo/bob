@@ -1,12 +1,11 @@
 module Agent.Bob.Command.ReadConsole where
 
-import Control.Arrow ((&&&))
-import Data.Aeson qualified as Aeson
 import Agent.Bob.Command (IsCommand(..))
 import Agent.Bob.Data.Event (IsEvent(..))
 import Agent.Bob.Data.UserInput (UserInput)
 import Agent.Bob.Effect.Console (readUserInput)
-import Witch (from)
+import Agent.Bob.Prelude
+import Data.Aeson qualified as Aeson
 
 data ReadConsole = ReadConsole
 

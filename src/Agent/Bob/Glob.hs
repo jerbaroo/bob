@@ -1,9 +1,7 @@
 module Agent.Bob.Glob where
 
-import Data.String (IsString)
-import Data.Text (Text)
+import Agent.Bob.Prelude
 import System.FilePath.Glob qualified as Glob
-import Witch (from)
 
 -- | A glob pattern.
 newtype Glob = Glob Text

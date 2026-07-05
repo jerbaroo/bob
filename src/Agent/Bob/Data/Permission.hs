@@ -1,9 +1,8 @@
 module Agent.Bob.Data.Permission where
 
-import Data.Text (Text)
+import Agent.Bob.Prelude
 import Data.Text qualified as Text
 import Agent.Bob.Data.ToolName (ToolName)
-import Witch (from)
 
 -- | A single granted permission: a tool and the raw parameter scoping it.
 data Permission = Permission

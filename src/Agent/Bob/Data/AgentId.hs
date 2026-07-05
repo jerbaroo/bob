@@ -1,6 +1,6 @@
 module Agent.Bob.Data.AgentId where
 
-import Witch (From(..))
+import Agent.Bob.Prelude
 import Agent.Bob.Pretty (Pretty(..))
 
 newtype AgentId = AgentId Int

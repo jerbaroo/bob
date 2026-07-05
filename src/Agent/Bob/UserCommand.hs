@@ -1,10 +1,8 @@
 module Agent.Bob.UserCommand where
 
-import Data.List (isPrefixOf)
-import Data.Text (Text)
-import Data.Text qualified as Text
 import Agent.Bob.Data.UserInput (UserInput)
-import Witch (from)
+import Agent.Bob.Prelude
+import Data.Text qualified as Text
 
 -- | A command typed by the user e.g. @/config show@.
 class IsUserCommand c where

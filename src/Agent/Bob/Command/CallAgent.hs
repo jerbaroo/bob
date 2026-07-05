@@ -1,13 +1,5 @@
 module Agent.Bob.Command.CallAgent where
 
-import Control.Monad.Extra (whenJust)
-import Control.Monad.Hefty (Eff, (:>))
-import Data.Aeson qualified as Aeson
-import Data.Effect.Reader (Ask, ask)
-import Data.Effect.State (State, get)
-import Data.Map qualified as Map
-import Data.Maybe (fromMaybe)
-import Prelude hiding (readFile)
 import Agent.Bob.Command (IsCommand(..))
 import Agent.Bob.Data.AgentId (AgentId)
 import Agent.Bob.Data.AgentInput (AgentInput(..))
@@ -21,9 +13,11 @@ import Agent.Bob.Data.Role (Role(..))
 import Agent.Bob.Effect.Agent (callAgent)
 import Agent.Bob.Effect.Console (writeSection)
 import Agent.Bob.Effect.File (File, readFile)
+import Agent.Bob.Prelude hiding (readFile)
 import Agent.Bob.Pretty (Pretty(..))
 import Agent.Bob.Prompt.Build (buildPrompt)
-import Witch (from)
+import Data.Aeson qualified as Aeson
+import Data.Map qualified as Map
 
 -- | Call the agent with a prompt built from the recorded events.
 data CallAgent = CallAgent

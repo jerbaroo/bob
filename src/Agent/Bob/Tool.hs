@@ -1,13 +1,9 @@
 module Agent.Bob.Tool where
 
-import Control.Monad.Hefty (Eff, (:>))
-import Data.Aeson qualified as Aeson
-import Data.Proxy (Proxy(..))
-import Data.Text (Text)
-import Data.Typeable (Typeable, typeRep)
 import Agent.Bob.Data.ToolName (ToolName)
 import Agent.Bob.Effect.File (File)
-import Witch (from)
+import Agent.Bob.Prelude
+import Data.Aeson qualified as Aeson
 
 data Tool
   = forall t
@@ -34,7 +30,7 @@ class Typeable t => IsTool t where
 
 -- | The name the model uses to request a tool, derived from the type name.
 toolName :: forall t. Typeable t => ToolName
-toolName = from $ typeRep (Proxy @t)
+toolName = from $ showTyCon @t
 
 toolName' :: Tool -> ToolName
 toolName' (Tool (_ :: t)) = toolName @t

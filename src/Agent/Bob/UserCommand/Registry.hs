@@ -1,9 +1,8 @@
 module Agent.Bob.UserCommand.Registry where
 
-import Data.List.Extra (firstJust)
-import Data.Proxy (Proxy(..))
 import Agent.Bob.Command (Command(..))
 import Agent.Bob.Data.UserInput (UserInput)
+import Agent.Bob.Prelude
 import Agent.Bob.UserCommand (IsUserCommand(..))
 import Agent.Bob.UserCommand.Help (Help)
 import Agent.Bob.UserCommand.Registry.Base (SomeUserCommand(..), baseUserCommands)

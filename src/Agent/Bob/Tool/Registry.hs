@@ -1,15 +1,11 @@
 module Agent.Bob.Tool.Registry where
 
-import Data.Aeson qualified as Aeson
-import Data.Aeson.Types qualified as Aeson
-import Data.List.Extra (firstJust)
-import Data.Maybe (fromMaybe)
-import Data.Proxy (Proxy(..))
-import Data.Text (Text)
 import Agent.Bob.Data.ToolName (ToolName)
+import Agent.Bob.Prelude
 import Agent.Bob.Tool (IsTool(..), Tool(..), toolName)
 import Agent.Bob.Tool.ReadFiles (ReadFiles)
-import Witch (from)
+import Data.Aeson qualified as Aeson
+import Data.Aeson.Types qualified as Aeson
 
 -- | An existential over a tool type (not a value).
 data SomeTool

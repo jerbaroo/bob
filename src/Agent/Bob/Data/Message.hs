@@ -1,10 +1,8 @@
 module Agent.Bob.Data.Message where
 
+import Agent.Bob.Prelude
 import Data.Aeson ((.:), (.:?))
 import Data.Aeson qualified as Aeson
-import Data.Functor ((<&>))
-import Data.Maybe (catMaybes)
-import Data.Text (Text)
 import Agent.Bob.Data.Role (Role)
 import Agent.Bob.Data.Thinking (Thinking(..))
 

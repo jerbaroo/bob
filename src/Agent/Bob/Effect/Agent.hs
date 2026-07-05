@@ -1,16 +1,14 @@
 module Agent.Bob.Effect.Agent where
 
-import Control.Monad.Hefty (Effect, Eff, Emb, makeEffectF, (:>), type (~>), interpret, liftIO)
-import Data.Effect.Reader (Ask, ask)
 import Agent.Bob.Data.AgentInput (AgentInput)
 import Agent.Bob.Data.AgentOutput (AgentOutput(..))
 import Agent.Bob.Data.Config (Config(..))
+import Agent.Bob.Prelude
 import Agent.Bob.Prompt.Build (buildPrompt)
 import Network.HTTP.Request (Response(body))
 import Network.HTTP.Client (newManager, managerResponseTimeout, responseTimeoutMicro)
 import Network.HTTP.Client.TLS (tlsManagerSettings)
 import Network.HTTP.Request (Request(..), Method(POST), sendWith)
-import Witch (from)
 
 data Agent :: Effect where
   CallAgent :: AgentInput -> Agent f AgentOutput

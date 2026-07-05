@@ -1,13 +1,11 @@
 module Agent.Bob.Data.Thinking where
 
+import Agent.Bob.Prelude
 import Data.Aeson qualified as Aeson
 import Data.Char (isDigit)
-import Data.String (IsString(..))
-import Data.Text (Text)
 import Data.Text qualified as Text
 import Agent.Bob.Pretty (Pretty(..))
 import Agent.Bob.Pretty qualified as Pretty
-import Witch (From(..), into, via)
 
 newtype Thinking = Thinking Text
   deriving newtype (Aeson.FromJSON, Aeson.ToJSON, From Text, Show)

@@ -1,6 +1,6 @@
 module Agent.Bob.Prompt where
 
-import Data.Text (Text)
+import Agent.Bob.Prelude
 import Data.Text qualified as Text
 
 -- | Render a value as plain text destined for the model's prompt.

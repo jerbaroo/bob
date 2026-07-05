@@ -1,7 +1,6 @@
 module Agent.Bob.Data.Config where
 
-import Data.Maybe (catMaybes)
-import Data.Text (Text)
+import Agent.Bob.Prelude
 import Agent.Bob.Data.Level (Level)
 import Agent.Bob.Data.Temperature (Temperature)
 import Agent.Bob.Pretty (Pretty(..))

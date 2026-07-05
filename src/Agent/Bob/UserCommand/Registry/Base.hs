@@ -1,9 +1,9 @@
 module Agent.Bob.UserCommand.Registry.Base where
 
 import Data.Aeson qualified as Aeson
-import Data.Proxy (Proxy(..))
 import Agent.Bob.Command (IsCommand)
 import Agent.Bob.Data.Event (IsEvent)
+import Agent.Bob.Prelude
 import Agent.Bob.UserCommand (IsUserCommand)
 import Agent.Bob.UserCommand.AgentCall (AgentCall)
 import Agent.Bob.UserCommand.ConfigShow (ConfigShow)

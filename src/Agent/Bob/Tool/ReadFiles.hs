@@ -1,15 +1,13 @@
 module Agent.Bob.Tool.ReadFiles where
 
-import Control.Monad (forM)
-import Data.Aeson ((.:))
-import Data.Aeson qualified as Aeson
-import Data.Text (Text)
-import Data.Text qualified as Text
-import Prelude hiding (readFile)
 import Agent.Bob.Effect.File (readFile, resolvePath)
 import Agent.Bob.Glob (Glob(..))
 import Agent.Bob.Glob qualified as Glob
+import Agent.Bob.Prelude hiding (readFile)
 import Agent.Bob.Tool (IsTool(..))
+import Data.Aeson ((.:))
+import Data.Aeson qualified as Aeson
+import Data.Text qualified as Text
 
 -- | Read one or more files within a directory.
 data ReadFiles = ReadFiles

@@ -1,10 +1,6 @@
 module Agent.Bob.Effect.Console where
 
-import Control.Monad (unless, when)
-import Control.Monad.Hefty (Effect, Eff, Emb, makeEffectF, (:>), type (~>), interpret, liftIO)
-import Data.Effect.Reader (Ask, asks)
-import Data.Effect.State (State, gets, modify)
-import Data.Text (Text)
+import Agent.Bob.Prelude
 import Data.Text qualified as Text
 import Agent.Bob.Data.Config (Config(..))
 import Agent.Bob.Data.HarnessState (HarnessState(..))
@@ -12,7 +8,6 @@ import Agent.Bob.Data.Level (Level(..))
 import Agent.Bob.Data.Role (Role(..))
 import Agent.Bob.Data.UserInput (UserInput(..))
 import Agent.Bob.Pretty qualified as Pretty
-import Witch (From(..))
 import System.IO (hFlush, stdout)
 
 data Console :: Effect where

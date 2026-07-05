@@ -1,8 +1,8 @@
 module Agent.Bob.Data.FinishReason where
 
+import Agent.Bob.Prelude
 import Data.Aeson qualified as Aeson
 import Agent.Bob.Pretty (Pretty(..))
-import Witch (from)
 
 data FinishReason = Stop
   deriving Show

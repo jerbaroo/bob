@@ -1,10 +1,8 @@
 module Agent.Bob.Data.Resolution where
 
+import Agent.Bob.Prelude
 import Data.Aeson qualified as Aeson
-import Data.String (IsString(..))
-import Data.Text (Text)
 import Agent.Bob.Pretty (Pretty(..))
-import Witch (From(..), via)
 
 newtype Resolution = Resolution Text
   deriving newtype (Aeson.FromJSON, Aeson.ToJSON, From Text, Show)

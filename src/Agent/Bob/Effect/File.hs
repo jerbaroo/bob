@@ -1,12 +1,10 @@
 module Agent.Bob.Effect.File where
 
+import Agent.Bob.Prelude
 import Control.Exception (IOException, try)
-import Control.Monad.Hefty (Effect, Eff, Emb, makeEffectF, (:>), type (~>), interpret, liftIO)
-import Data.Text (Text)
 import System.Directory (createDirectoryIfMissing, getHomeDirectory, makeAbsolute)
 import System.FilePath (takeDirectory, (</>))
 import System.IO qualified as IO
-import Witch (from)
 
 data File :: Effect where
   AppendFile  :: Text -> Text -> File f ()

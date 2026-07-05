@@ -1,12 +1,5 @@
 module Agent.Bob.Command where
 
-import Control.Monad (forM_)
-import Control.Monad.Hefty (Eff, (:>))
-import Data.Aeson qualified as Aeson
-import Data.Effect.Reader (Ask, asks)
-import Data.Effect.State (State, modify)
-import Data.Map qualified as Map
-import Prelude hiding (appendFile)
 import Agent.Bob.Data.AgentId (AgentId)
 import Agent.Bob.Data.Config (Config(..))
 import Agent.Bob.Data.Event (Event, IsEvent(..))
@@ -16,9 +9,10 @@ import Agent.Bob.Data.Role (Role(..))
 import Agent.Bob.Effect.Agent (Agent)
 import Agent.Bob.Effect.Console (Console, writeSection)
 import Agent.Bob.Effect.File (File, appendFile)
+import Agent.Bob.Prelude hiding (appendFile)
 import Agent.Bob.Pretty (compact)
-import Safe (lastMay)
-import Witch (From(..))
+import Data.Aeson qualified as Aeson
+import Data.Map qualified as Map
 
 -- | The effects every command is allowed to use.
 type Harness es =

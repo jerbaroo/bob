@@ -1,14 +1,14 @@
 module Agent.Bob.Prompt.Build where
 
-import Data.Aeson qualified as Aeson
-import Data.Maybe (catMaybes)
-import Data.Text qualified as Text
 import Agent.Bob.Data.AgentInput (AgentInput(..))
 import Agent.Bob.Data.Event (eventToMessage)
 import Agent.Bob.Data.Message (Message(..))
 import Agent.Bob.Data.Role (Role(..))
+import Agent.Bob.Prelude
 import Agent.Bob.Prompt (ToPrompt(..))
 import Agent.Bob.Tool.Registry (toolDescriptions)
+import Data.Aeson qualified as Aeson
+import Data.Text qualified as Text
 
 buildPrompt :: AgentInput -> Aeson.Value
 buildPrompt AgentInput{..} =

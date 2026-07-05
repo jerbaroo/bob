@@ -2,7 +2,7 @@ module Agent.Bob.Data.HarnessState where
 
 import Data.Map (Map)
 import Data.Map qualified as Map
-import Prelude hiding (read)
+import Agent.Bob.Prelude hiding (read)
 import Agent.Bob.Data.AgentId (AgentId)
 import Agent.Bob.Data.Task (Task)
 import Agent.Bob.Data.Config (Config(..))

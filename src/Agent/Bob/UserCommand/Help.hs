@@ -1,16 +1,13 @@
 module Agent.Bob.UserCommand.Help where
 
-import Control.Arrow (first)
 import Data.Aeson qualified as Aeson
-import Data.List (sortOn)
-import Data.Proxy (Proxy(..))
-import Data.Text (Text)
 import Data.Text qualified as Text
 import Agent.Bob.Command (IsCommand(..))
 import Agent.Bob.Data.Event (IsEvent(..))
 import Agent.Bob.Data.Level (Level(..))
 import Agent.Bob.Data.Role (Role(..))
 import Agent.Bob.Effect.Console (writeSection)
+import Agent.Bob.Prelude
 import Agent.Bob.Pretty (pretty)
 import Agent.Bob.UserCommand (IsUserCommand(..))
 import Agent.Bob.UserCommand.Registry.Base (SomeUserCommand(..), baseUserCommands)

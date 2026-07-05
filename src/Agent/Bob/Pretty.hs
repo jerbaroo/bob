@@ -1,13 +1,11 @@
 module Agent.Bob.Pretty where
 
+import Agent.Bob.Prelude
 import Data.Aeson qualified as Aeson
 import Data.Aeson.Encode.Pretty qualified as Aeson
 import Data.ByteString qualified as ByteString
-import Data.Functor ((<&>))
-import Data.Text (Text)
 import Data.Text qualified as Text
 import Data.Text.Encoding (decodeUtf8)
-import Witch (from)
 
 class Pretty a where
   pretty :: a -> Text

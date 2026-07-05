@@ -87,6 +87,8 @@ library
                     , Agent.Bob.Effect.File
                     , Agent.Bob.Glob
                     , Agent.Bob.Permissions
+                    , Agent.Bob.Prelude
+                    , Agent.Bob.Prelude.Typeable
                     , Agent.Bob.Pretty
                     , Agent.Bob.Prompt
                     , Agent.Bob.Prompt.Build
@@ -109,6 +111,7 @@ library
                       , DefaultSignatures
                       , DuplicateRecordFields
                       , NoFieldSelectors
+                      , NoImplicitPrelude
                       , OverloadedRecordDot
                       , OverloadedStrings
                       , RecordWildCards
@@ -121,6 +124,7 @@ library
 
     -- Other library packages from which modules are imported.
     build-depends:    Glob
+                    , QuickCheck
                     , aeson
                     , aeson-pretty
                     , base
@@ -133,6 +137,7 @@ library
                     , heftia-effects
                     , http-client
                     , http-client-tls
+                    , quickcheck-instances
                     , request
                     , safe
                     , text
@@ -177,6 +182,19 @@ test-suite agent-bob-test
 
     -- Modules included in this executable, other than Main.
     -- other-modules:
+
+    default-extensions: AllowAmbiguousTypes
+                      , BlockArguments
+                      , DefaultSignatures
+                      , DuplicateRecordFields
+                      , NoFieldSelectors
+                      , NoImplicitPrelude
+                      , OverloadedRecordDot
+                      , OverloadedStrings
+                      , RecordWildCards
+                      , TemplateHaskell
+                      , TypeFamilies
+                      , UndecidableInstances
 
     -- LANGUAGE extensions used by modules in this package.
     -- other-extensions:

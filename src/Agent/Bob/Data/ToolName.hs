@@ -1,11 +1,9 @@
 module Agent.Bob.Data.ToolName where
 
+import Agent.Bob.Prelude
 import Data.Aeson qualified as Aeson
-import Data.String (IsString)
-import Data.Text (Text)
 import Data.Typeable (TypeRep)
 import Agent.Bob.Pretty (Pretty)
-import Witch (From(..), via)
 
 -- | The name the model uses to request a tool.
 newtype ToolName = ToolName Text

@@ -1,8 +1,8 @@
 module Agent.Bob.Data.Temperature where
 
-import Data.Aeson as Aeson
+import Agent.Bob.Prelude
 import Agent.Bob.Pretty (Pretty(..))
-import Witch (from)
+import Data.Aeson as Aeson
 
 newtype Temperature = Temperature Float
   deriving newtype (Fractional, Num)

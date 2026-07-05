@@ -1,5 +1,7 @@
 module Agent.Bob.Data.Level where
 
+import Agent.Bob.Prelude
+
 import Agent.Bob.Pretty (Pretty(..))
 
 data Level
