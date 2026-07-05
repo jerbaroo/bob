@@ -27,6 +27,8 @@ data ConfigF f = Config
   , modelName :: HKD f Text
   , modelTemperature :: HKD f Temperature
   , permissionsPath :: HKD f Text
+  , projectRoot :: HKD f Text
+  -- ^ Derived from the git root (or CWD) at startup, not user-configurable.
   , soulPath :: HKD f (Maybe Text)
   , timeoutSeconds :: HKD f Int
   }
@@ -48,6 +50,7 @@ instance Pretty Config where
           , Just ("model_name", modelName)
           , Just ("model_temperature", pretty modelTemperature)
           , Just ("permissions_path", permissionsPath)
+          , Just ("project_root", projectRoot)
           , ("soul_path",) <$> soulPath
           , Just ("timeout_seconds", pretty timeoutSeconds)
           ]
@@ -63,6 +66,7 @@ emptyPartial = Config
   , modelName = Nothing
   , modelTemperature = Nothing
   , permissionsPath = Nothing
+  , projectRoot = Nothing
   , soulPath = Nothing
   , timeoutSeconds = Nothing
   }
@@ -80,6 +84,7 @@ instance Semigroup PartialConfig where
     , modelName = a.modelName <|> b.modelName
     , modelTemperature = a.modelTemperature <|> b.modelTemperature
     , permissionsPath = a.permissionsPath <|> b.permissionsPath
+    , projectRoot = a.projectRoot <|> b.projectRoot
     , soulPath = a.soulPath <|> b.soulPath
     , timeoutSeconds = a.timeoutSeconds <|> b.timeoutSeconds
     }
@@ -94,6 +99,7 @@ applyPartial p c = Config
   , modelName = fromMaybe c.modelName p.modelName
   , modelTemperature = fromMaybe c.modelTemperature p.modelTemperature
   , permissionsPath = fromMaybe c.permissionsPath p.permissionsPath
+  , projectRoot = fromMaybe c.projectRoot p.projectRoot
   , soulPath = fromMaybe c.soulPath p.soulPath
   , timeoutSeconds = fromMaybe c.timeoutSeconds p.timeoutSeconds
   }
@@ -112,6 +118,10 @@ instance Aeson.FromJSON PartialConfig where
     modelName <- o .:? "model_name"
     modelTemperature <- o .:? "model_temperature"
     permissionsPath <- o .:? "permissions_path"
+    -- Derived from the git root at startup; configuring it makes no sense.
+    projectRoot <- o .:? "project_root" >>= \case
+      Nothing -> pure Nothing
+      Just (_ :: Text) -> fail "project_root should not exist in config file"
     soulPath <- o .:? "soul_path"
     timeoutSeconds <- o .:? "timeout_seconds"
     pure Config{..}

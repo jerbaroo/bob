@@ -93,6 +93,7 @@ library
                     , Agent.Bob.Prelude
                     , Agent.Bob.Prelude.Typeable
                     , Agent.Bob.Pretty
+                    , Agent.Bob.ProjectRoot
                     , Agent.Bob.Prompt
                     , Agent.Bob.Prompt.Build
                     , Agent.Bob.Tool
@@ -188,6 +189,7 @@ test-suite agent-bob-test
     -- Modules included in this executable, other than Main.
     other-modules:    Test.Config
                     , Test.Event
+                    , Test.ProjectRoot
                     , Test.Schema
 
     default-extensions: AllowAmbiguousTypes

@@ -22,6 +22,7 @@ baseConfig = Config
   , modelName = "DefaultModel"
   , modelTemperature = 0.5
   , permissionsPath = "default-perms"
+  , projectRoot = "default-root"
   , soulPath = Nothing
   , timeoutSeconds = 60
   }
@@ -69,6 +70,9 @@ spec = describe "config parsers" $ do
 
   it "rejects config_path in the config file" $
     isLeft (File.parseConfig "{\"config_path\": \"other.json\"}") `shouldBe` True
+
+  it "rejects project_root in the config file" $
+    isLeft (File.parseConfig "{\"project_root\": \"/elsewhere\"}") `shouldBe` True
 
   it "rejects an unknown log level in the config file" $
     isLeft (File.parseConfig "{\"log_level\": \"nope\"}") `shouldBe` True

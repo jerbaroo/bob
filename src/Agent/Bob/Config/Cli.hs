@@ -31,6 +31,8 @@ partialConfig = Config
   <*> optional (strOption
         ( long "permissions-path" <> metavar "PATH"
        <> help "Granted-permissions file" ))
+  -- 'projectRoot' is derived from the git root at startup, not settable.
+  <*> pure Nothing
   -- 'soulPath' is optional in a resolved config, so a partial config nests it:
   -- @Just (Just p)@ = set this soul, @Nothing@ = unspecified.
   <*> optional (Just <$> strOption
