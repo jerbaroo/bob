@@ -47,8 +47,15 @@ writeSection role messageLevel message = do
     -- Only print a separator if the role is different.
     unless sameRole $ writeSeparator role
     let vSep = if sameRole then "\n" else ""
-    writeConsole $ vSep <> Text.stripEnd message <> "\n"
+    writeConsole $ vSep <> prefix messageLevel <> Text.stripEnd message <> "\n"
     modify $ \s -> s{loggingRole=Just role}
+
+-- | Tag error/debug lines so their severity is visible in the transcript.
+-- Only the first line is prefixed. Other levels pass through untouched.
+prefix :: Level -> Text
+prefix Error = Pretty.colour Pretty.red "[error] "
+prefix Debug = Pretty.colour Pretty.grey "[debug] "
+prefix _     = ""
 
 writeSeparator :: (Ask Config :> es, Console :> es) => Role -> Eff es ()
 writeSeparator role = do

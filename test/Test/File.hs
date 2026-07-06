@@ -1,7 +1,7 @@
 module Test.File (spec) where
 
-import Agent.Bob.Effect.File (appendFile, readFile, runFile, writeFile)
-import Agent.Bob.Prelude hiding (appendFile, readFile, writeFile)
+import Agent.Bob.Effect.File (appendFile, readFileMaybe, runFile, writeFile)
+import Agent.Bob.Prelude hiding (appendFile, writeFile)
 import System.IO.Temp (withSystemTempDirectory)
 import Test.Hspec
 
@@ -17,7 +17,7 @@ spec = describe "Effect.File" $
       let name = "log"
       runEff . runFile dir $ writeFile name "line1\n"
       result <- runEff . runFile dir $ do
-        _unforced <- readFile name          -- deliberately not forced
+        _unforced <- readFileMaybe name          -- deliberately not forced
         appendFile name "line2\n"
-        readFile name
+        readFileMaybe name
       result `shouldBe` Just "line1\nline2\n"

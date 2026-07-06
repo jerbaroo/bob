@@ -1,9 +1,9 @@
 module Agent.Bob.Tool.ReadFiles where
 
-import Agent.Bob.Effect.File (readFile, resolvePath)
+import Agent.Bob.Effect.File (readFileMaybe, resolvePath)
 import Agent.Bob.Glob (Glob(..))
 import Agent.Bob.Glob qualified as Glob
-import Agent.Bob.Prelude hiding (readFile)
+import Agent.Bob.Prelude
 import Agent.Bob.Tool (IsTool(..))
 import Data.Aeson ((.:))
 import Data.Aeson qualified as Aeson
@@ -40,7 +40,7 @@ instance IsTool ReadFiles where
     render (path, Just c)  = "== " <> path <> " ==\n" <> c
     render (path, Nothing) = "== " <> path <> " == (could not read)"
   runTool ReadFiles{..} =
-    forM files \f -> (f,) <$> readFile (directory <> "/" <> f)
+    forM files \f -> (f,) <$> readFileMaybe (directory <> "/" <> f)
   -- Mirrors 'Aeson.FromJSON': both fields are required.
   toolArgsSchema = Aeson.object
     [ ("type", "object")

@@ -38,9 +38,18 @@ instance IsCommand AgentCall where
       []    -> pure ()
       tools -> do
         outcomes <- forM tools \tool -> do
-          checkPermission tool
-          toolOutput <- runToolForModel tool
-          writeSection System Info $ into @Text (toolName' tool) <> " tool output:\n" <> toolOutput
+          let name = into @Text $ toolName' tool
+          toolOutput <- checkPermission tool >>= \case
+            -- Denied: surface the reason to the model as the tool output so it
+            -- can adapt, rather than crashing the harness.
+            False -> do
+              let reason = "No permission for tool " <> name
+              writeSection System Error reason
+              pure reason
+            True -> do
+              result <- runToolForModel tool
+              writeSection System Info $ name <> " tool output:\n" <> result
+              pure result
           pure $ ToolResult (toolName' tool) toolOutput
         recordEvents agentId $ from <$> outcomes
         output' <- step agentId CallAgent.CallAgent

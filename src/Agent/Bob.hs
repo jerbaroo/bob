@@ -7,13 +7,13 @@ import Agent.Bob.Config (loadConfig)
 import Agent.Bob.Data.Config (ConfigF(..))
 import Agent.Bob.Data.AgentId (AgentId(..))
 import Agent.Bob.Data.Event (IsEvent(..))
-import Agent.Bob.Data.Event.Registry (parseEventLine)
+import Agent.Bob.Data.Event.Registry (LineResult(..), readEventLine)
 import Agent.Bob.Data.HarnessState (HarnessState(..), mkHarnessState)
 import Agent.Bob.Data.Level (Level(..))
 import Agent.Bob.Data.Role (Role(..))
 import Agent.Bob.Effect.Agent (runAgent)
 import Agent.Bob.Effect.Console (runConsole, writeSection)
-import Agent.Bob.Effect.File (readFile, runFile)
+import Agent.Bob.Effect.File (readFileLogErr, runFile)
 import Agent.Bob.Permissions (readPermissions, renderPermissions)
 import Agent.Bob.Pretty (Pretty(..))
 import Agent.Bob.UserCommand.Registry (parseCommand)
@@ -29,9 +29,14 @@ import Data.Text qualified as Text
 restoreSession :: Harness es => AgentId -> Eff es ()
 restoreSession agentId = do
   path <- asks (.memoryPath)
-  contents <- readFile path
-  -- TODO log an error if any events failed to parse.
-  let restored = maybe [] (mapMaybe parseEventLine . Text.lines) contents
+  contents <- readFileLogErr path
+  -- Classify each non-blank line. Malformed lines are genuine corruption worth
+  -- reporting; Skipped lines (commands and other non-restored events) are
+  -- expected, so they must not be counted as errors.
+  let results = map readEventLine $ filter (not . Text.null . Text.strip) $
+        maybe [] Text.lines contents
+      restored = [e | Restored e <- results]
+      malformed = length [() | Malformed <- results]
   modify $ \HarnessState{..} -> HarnessState
     { events = Map.insert agentId (reverse restored) events
     , tasks = maybe tasks (Map.singleton agentId) $
@@ -40,13 +45,15 @@ restoreSession agentId = do
     }
   writeSection System Meta $
     "Restored " <> pretty (length restored) <> " events."
+  when (malformed > 0) $ writeSection System Error $
+    "Skipped " <> pretty malformed <> " malformed event line(s) during restore."
 
 -- | Point the user at @/init@ when any referenced config file is missing.
 checkInitFiles :: Harness es => Eff es ()
 checkInitFiles = do
   Config{configPath, permissionsPath, soulPath} <- ask
   let paths = catMaybes [Just configPath, Just permissionsPath, soulPath]
-  missing <- filterM (fmap isNothing . readFile) paths
+  missing <- filterM (fmap isNothing . readFileLogErr) paths
   unless (null missing) $ writeSection System Info $
        "Missing config files: " <> Text.intercalate ", " missing
     <> ".\nRun /init to create them with default contents."

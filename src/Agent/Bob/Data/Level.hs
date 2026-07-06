@@ -6,8 +6,11 @@ import Agent.Bob.Pretty (Pretty(..))
 import Data.Aeson qualified as Aeson
 import Data.Text qualified as Text
 
+-- | Ordering matters: first = most important. 'Error' is first so it prints at
+-- every configured log level (the console guard is @logLevel >= messageLevel@).
 data Level
-  = Info
+  = Error
+  | Info
   | Thinking
   | Meta
   | Debug
@@ -23,7 +26,7 @@ instance Aeson.FromJSON Level where
   parseJSON = Aeson.withText "Level" $ either (fail . from) pure . parseLevel
 
 allLevels :: [Level]
-allLevels = [Debug, Info, Meta, Thinking]
+allLevels = [Debug, Error, Info, Meta, Thinking]
 
 parseLevel :: Text -> Either Text Level
 parseLevel x = case filter ((== x) . into @Text) allLevels of

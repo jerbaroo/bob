@@ -6,8 +6,8 @@ import Agent.Bob.Data.Event (IsEvent(..))
 import Agent.Bob.Data.Level (Level(..))
 import Agent.Bob.Data.Role (Role(..))
 import Agent.Bob.Effect.Console (writeSection)
-import Agent.Bob.Effect.File (File, appendFile, readFile, writeFile)
-import Agent.Bob.Prelude hiding (appendFile, readFile, writeFile)
+import Agent.Bob.Effect.File (File, appendFile, readFileMaybe, writeFile)
+import Agent.Bob.Prelude hiding (appendFile, writeFile)
 import Agent.Bob.Pretty (pretty)
 import Agent.Bob.Soul (defaultSoul)
 import Agent.Bob.UserCommand (IsUserCommand(..))
@@ -30,7 +30,7 @@ instance IsCommand Init where
              ]
           <> maybe [] (\path -> [(path, defaultSoul)]) config.soulPath
     reports <- forM files \(path, contents) ->
-      readFile path >>= \case
+      readFileMaybe path >>= \case
         Just _  -> pure $ "Kept " <> path <> " (already exists)."
         Nothing -> do
           writeFile path contents
@@ -43,7 +43,7 @@ instance IsCommand Init where
 -- | Session logs are per-branch working history, not something to commit:
 -- make sure the project's .gitignore covers the memory directory.
 initGitignore :: File :> es => Eff es Text
-initGitignore = readFile gitignorePath >>= \case
+initGitignore = readFileMaybe gitignorePath >>= \case
   Just content
     | gitignoreEntry `elem` (Text.strip <$> Text.lines content) ->
         pure $ "Kept " <> gitignorePath

@@ -2,7 +2,7 @@ module Agent.Bob.Command where
 
 import Agent.Bob.Data.AgentId (AgentId)
 import Agent.Bob.Data.Config (Config, ConfigF(..))
-import Agent.Bob.Data.Event (Event, IsEvent(..))
+import Agent.Bob.Data.Event (Event, IsEvent(..), eventName)
 import Agent.Bob.Data.HarnessState (HarnessState(..))
 import Agent.Bob.Data.Level (Level(..))
 import Agent.Bob.Data.Role (Role(..))
@@ -33,7 +33,6 @@ instance Aeson.ToJSON Command where
   toJSON (Command c) = Aeson.toJSON c
 
 instance IsEvent Command where
-  eventName (Command c) = "Command:" <> eventName c
   eventTasks (Command c) = eventTasks c
   eventToMessage (Command c) = eventToMessage c
 
@@ -59,8 +58,8 @@ recordEvents agentId newEvents = do
     , ..
     }
   memoryPath <- asks (.memoryPath)
-  forM_ newEvents $ \event -> do
-    writeSection System Meta $ "Recorded event: " <> eventName event
+  forM_ newEvents $ \(event :: e) -> do
+    writeSection System Meta $ "Recorded event: " <> eventName @e
     appendFile memoryPath $ compact event <> "\n"
 
 -- | Run a command, record the events, and return the command result.

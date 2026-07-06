@@ -4,8 +4,9 @@ import Agent.Bob.Config.Cli qualified as Cli
 import Agent.Bob.Config.File qualified as File
 import Agent.Bob.Data.Config (Config, ConfigF(..), applyPartial, defaultConfigPath, globalConfigPath)
 import Agent.Bob.Data.Level (Level(..))
-import Agent.Bob.Effect.File (readFile, runFile)
-import Agent.Bob.Prelude hiding (readFile)
+import Agent.Bob.Effect.Console (runConsole)
+import Agent.Bob.Effect.File (readFileMaybe, runFile)
+import Agent.Bob.Prelude
 import Agent.Bob.ProjectRoot (findProjectRoot, projectDir, sessionKey)
 import Data.Text qualified as Text
 import Options.Applicative (execParser)
@@ -43,7 +44,7 @@ loadConfig = do
   -- Reuse the File effect so config paths get the same tilde-expansion,
   -- root-relative resolution and missing-file handling as everything else.
   let readPartial path = do
-        rawConfig <- runEff . runFile root $ readFile path
+        rawConfig <- runEff . runConsole . runFile root $ readFileMaybe path
         either (die . Text.unpack) pure $
           maybe (Right mempty) File.parseConfig rawConfig
   globalPartial <- readPartial globalConfigPath

@@ -5,8 +5,8 @@ import Agent.Bob.Data.HarnessState (HarnessState(..))
 import Agent.Bob.Data.Level (Level(..))
 import Agent.Bob.Data.Role (Role(..))
 import Agent.Bob.Effect.Console (Console, writeSection)
-import Agent.Bob.Effect.File (File, readFile)
-import Agent.Bob.Prelude hiding (readFile)
+import Agent.Bob.Effect.File (File, readFileLogErr)
+import Agent.Bob.Prelude
 import Data.Text qualified as Text
 
 -- | The effective soul: the configured file when it exists, 'defaultSoul'
@@ -19,7 +19,7 @@ getSoul
 getSoul = do
   soulPath <- asks (.soulPath)
   soul <- maybe (pure defaultSoul)
-    (fmap (fromMaybe defaultSoul) . readFile) soulPath
+    (fmap (fromMaybe defaultSoul) . readFileLogErr) soulPath
   cached <- gets (.soulText)
   when (cached /= Just soul) do
     modify \s -> s{soulText = Just soul}

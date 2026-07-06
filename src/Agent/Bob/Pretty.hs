@@ -53,6 +53,9 @@ colour c t = c <> t <> reset
 grey :: Colour
 grey = "\ESC[90m"
 
+red :: Colour
+red = "\ESC[91m"
+
 cyanDim :: Colour
 cyanDim = "\ESC[2;36m"
 
