@@ -12,10 +12,13 @@ data AgentInput = AgentInput
   -- ^ History of events, including user input and tool results.
   --   May be a compressed version of the full history.
   , modelName :: Text
-  , modelTemperature :: Temperature
   , modelSkills :: [Skill]
-  -- ^ Skills available to pull in on demand.
+  -- ^ Skills the model may pull in on demand (not user-activated).
+  , modelSkillsActive :: [(Text, Text)]
+  -- ^ User-activated skills as @(name, full SKILL.md content)@, injected
+  --   directly into the prompt.
   , modelSoul :: Text
+  , modelTemperature :: Temperature
   , modelTasks :: [Task]
   -- ^ Current tasks to complete.
   }

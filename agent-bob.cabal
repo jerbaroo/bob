@@ -103,6 +103,7 @@ library
                     , Agent.Bob.Tool.ReadFiles
                     , Agent.Bob.Tool.Registry
                     , Agent.Bob.UserCommand
+                    , Agent.Bob.UserCommand.ActivateSkill
                     , Agent.Bob.UserCommand.AgentCall
                     , Agent.Bob.UserCommand.ConfigShow
                     , Agent.Bob.UserCommand.Help

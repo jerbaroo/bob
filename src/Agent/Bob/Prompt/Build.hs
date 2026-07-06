@@ -66,9 +66,18 @@ buildPrompt AgentInput{..} =
               [ "To use a skill, read its file with the read_files tool."
               , toPrompt modelSkills
               ]
-        content = Text.intercalate "\n\n"
+        -- User-activated skills: their full content is included so the model
+        -- can follow them without a tool call.
+        activeSkillsStr = case modelSkillsActive of
+          [] -> ""
+          _  -> Text.intercalate "\n\n" $
+            [ "### ACTIVE SKILLS"
+            , "The user activated these skills. You should use them; their full instructions follow."
+            ] <> [ "#### " <> name <> "\n\n" <> body | (name, body) <- modelSkillsActive ]
+        content = Text.intercalate "\n\n" $ filter (not . Text.null)
           [ personaStr
           , modelSoul
+          , activeSkillsStr
           , tasksStr modelTasks
           , responseFormatStr
           , availableToolsStr

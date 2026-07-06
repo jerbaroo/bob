@@ -11,15 +11,17 @@ import Agent.Bob.Data.HarnessState (HarnessState(..))
 import Agent.Bob.Data.Level (Level(..))
 import Agent.Bob.Data.Message (Message(..))
 import Agent.Bob.Data.Role (Role(..))
+import Agent.Bob.Data.Skill (Skill(..))
 import Agent.Bob.Effect.Agent (callAgent)
 import Agent.Bob.Effect.Console (Console, writeSection)
-import Agent.Bob.Effect.File (File)
+import Agent.Bob.Effect.File (File, readFileMaybe)
 import Agent.Bob.Prelude
 import Agent.Bob.Pretty (Pretty(..))
 import Agent.Bob.Prompt.Build (buildPrompt)
 import Agent.Bob.Skill (getSkills)
 import Agent.Bob.Soul (getSoul)
 import Data.Aeson qualified as Aeson
+import Data.List (partition)
 import Data.Map qualified as Map
 
 -- | Call the agent with a prompt built from the recorded events.
@@ -65,7 +67,13 @@ mkAgentInput
 mkAgentInput agentId = do
   Config{modelName} <- ask
   modelSoul <- getSoul
-  modelSkills <- getSkills
+  allSkills <- getSkills
+  activated <- gets (.userActivatedSkills)
+  -- Activated skills are injected in full; the rest stay opt-in for the model.
+  let (active, modelSkills) = partition ((`elem` activated) . (.name)) allSkills
+  modelSkillsActive <- forM active \skill ->
+    -- TODO avoid silent failure, print an error.
+    (skill.name,) . fromMaybe "" <$> readFileMaybe skill.path
   HarnessState{..} <- get
   pure AgentInput
     { events = fromMaybe [] $ Map.lookup agentId events

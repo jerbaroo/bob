@@ -16,6 +16,7 @@ data HarnessState = HarnessState
   -- ^ A history of all that occurred.
   -- Everything else in this record should be derivable from the events.
   , loggingRole :: Maybe Role
+  -- ^ The currently active logger (i.e. who logged last).
   , tasks :: Map AgentId [Task]
   -- ^ The current tasks per-agent.
   , modelTemperature :: Temperature
@@ -26,6 +27,9 @@ data HarnessState = HarnessState
   , soulText :: Maybe Text
   -- ^ The soul as of the last read; 'Nothing' until first read. Kept so a
   -- change to the soul file mid-session can be detected and reported.
+  , userActivatedSkills :: [Text]
+  -- ^ Names of skills the user activated (e.g. via @/caveman@). Their full
+  -- content is included in every prompt; the rest stay opt-in for the model.
   }
 
 mkHarnessState :: Config -> HarnessState
@@ -36,4 +40,5 @@ mkHarnessState Config{..} = HarnessState
   , skills = []
   , soulText = Nothing
   , tasks = Map.empty
+  , userActivatedSkills = []
   }

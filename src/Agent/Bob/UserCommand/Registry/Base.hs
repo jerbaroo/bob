@@ -5,6 +5,7 @@ import Agent.Bob.Command (IsCommand)
 import Agent.Bob.Data.Event (IsEvent)
 import Agent.Bob.Prelude
 import Agent.Bob.UserCommand (IsUserCommand)
+import Agent.Bob.UserCommand.ActivateSkill (ActivateSkill)
 import Agent.Bob.UserCommand.AgentCall (AgentCall)
 import Agent.Bob.UserCommand.ConfigShow (ConfigShow)
 import Agent.Bob.UserCommand.Init (Init)
@@ -20,9 +21,11 @@ data SomeUserCommand
 -- renders this list and so cannot appear in it without an import cycle.
 baseUserCommands :: [SomeUserCommand]
 baseUserCommands =
-  [ SomeUserCommand $ Proxy @ConfigShow
+  [ SomeUserCommand $ Proxy @ActivateSkill
+  , SomeUserCommand $ Proxy @ConfigShow
   , SomeUserCommand $ Proxy @Init
   , SomeUserCommand $ Proxy @PermissionsShow
   , SomeUserCommand $ Proxy @Soul
+  -- Must be last:
   , SomeUserCommand $ Proxy @AgentCall
   ]
