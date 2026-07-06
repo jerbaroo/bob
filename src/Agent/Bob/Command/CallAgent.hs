@@ -3,7 +3,8 @@ module Agent.Bob.Command.CallAgent where
 import Agent.Bob.Command (IsCommand(..))
 import Agent.Bob.Data.AgentId (AgentId)
 import Agent.Bob.Data.AgentInput (AgentInput(..))
-import Agent.Bob.Data.AgentOutput (AgentMessageContent(..), AgentOutput(..))
+import Agent.Bob.Data.AgentOutput (AgentMessageContent(..), AgentOutput(..), AgentOutputMeta(..))
+import Agent.Bob.Data.FinishReason (FinishReason(..))
 import Agent.Bob.Data.Config (Config, ConfigF(..))
 import Agent.Bob.Data.Event (IsEvent(..))
 import Agent.Bob.Data.HarnessState (HarnessState(..))
@@ -38,6 +39,18 @@ instance IsCommand CallAgent where
     writeSection Assistant Info $ from agentMessageContent.resolution <> case agentMessageContent.tasks of
       [] -> ""
       _  -> "\n\nRemaining tasks:\n" <> pretty agentMessageContent.tasks
+    let AgentOutputMeta{..} = agentOutputMeta
+        totalMs = round (timePrompt + timePredicted) :: Int
+    writeSection Assistant Info $
+         pretty totalMs <> "ms, "
+      <> pretty tokensTotal <> " tokens ("
+      <> pretty tokensCached <> " cached)"
+    -- Stop and ToolCalls are normal; the rest signal a problem worth flagging.
+    case finishReason of
+      Length        -> writeSection Assistant Error "Output truncated (length limit reached)."
+      ContentFilter -> writeSection Assistant Error "Output filtered by the engine; partial message kept."
+      Other reason  -> writeSection Assistant Error $ "Unexpected finish reason: " <> reason
+      _             -> pure ()
     pure (agentOutput, [from agentOutput])
 
 instance IsEvent CallAgent where
