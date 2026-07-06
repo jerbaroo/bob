@@ -1,13 +1,12 @@
 module Agent.Bob.Data.Config where
 
-import Agent.Bob.Prelude
 import Agent.Bob.Data.Level (Level)
 import Agent.Bob.Data.Temperature (Temperature)
+import Agent.Bob.Prelude
 import Agent.Bob.Pretty (Pretty(..))
-import Control.Applicative ((<|>))
 import Data.Aeson ((.:?))
 import Data.Aeson qualified as Aeson
-import Data.Functor.Identity (Identity)
+import Data.Text qualified as Text
 
 -- | The machine-wide config file: the lowest-precedence file source.
 globalConfigPath :: Text
@@ -34,6 +33,8 @@ data ConfigF f = Config
   , permissionsPath :: HKD f Text
   , projectRoot :: HKD f Text
   -- ^ Derived from the git root (or CWD) at startup, not user-configurable.
+  , skillsPaths :: HKD f [Text]
+  -- ^ Directories scanned for skills at startup (each holds @<skill>/SKILL.md@).
   , soulPath :: HKD f (Maybe Text)
   , timeoutSeconds :: HKD f Int
   }
@@ -56,6 +57,7 @@ instance Pretty Config where
           , Just ("model_temperature", pretty modelTemperature)
           , Just ("permissions_path", permissionsPath)
           , Just ("project_root", projectRoot)
+          , Just ("skills_paths", Text.intercalate ", " skillsPaths)
           , ("soul_path",) <$> soulPath
           , Just ("timeout_seconds", pretty timeoutSeconds)
           ]
@@ -72,6 +74,7 @@ emptyPartial = Config
   , modelTemperature = Nothing
   , permissionsPath = Nothing
   , projectRoot = Nothing
+  , skillsPaths = Nothing
   , soulPath = Nothing
   , timeoutSeconds = Nothing
   }
@@ -90,6 +93,8 @@ instance Semigroup PartialConfig where
     , modelTemperature = a.modelTemperature <|> b.modelTemperature
     , permissionsPath = a.permissionsPath <|> b.permissionsPath
     , projectRoot = a.projectRoot <|> b.projectRoot
+    -- Additive across sources (not left-biased): combine both lists.
+    , skillsPaths = a.skillsPaths <> b.skillsPaths
     , soulPath = a.soulPath <|> b.soulPath
     , timeoutSeconds = a.timeoutSeconds <|> b.timeoutSeconds
     }
@@ -105,6 +110,8 @@ applyPartial p c = Config
   , modelTemperature = fromMaybe c.modelTemperature p.modelTemperature
   , permissionsPath = fromMaybe c.permissionsPath p.permissionsPath
   , projectRoot = fromMaybe c.projectRoot p.projectRoot
+  -- Additive: the configured paths are added to the default, not replacing it.
+  , skillsPaths = c.skillsPaths <> fromMaybe [] p.skillsPaths
   , soulPath = fromMaybe c.soulPath p.soulPath
   , timeoutSeconds = fromMaybe c.timeoutSeconds p.timeoutSeconds
   }
@@ -127,6 +134,7 @@ instance Aeson.FromJSON PartialConfig where
     projectRoot <- o .:? "project_root" >>= \case
       Nothing -> pure Nothing
       Just (_ :: Text) -> fail "project_root should not exist in config file"
+    skillsPaths <- o .:? "skills_paths"
     soulPath <- o .:? "soul_path"
     timeoutSeconds <- o .:? "timeout_seconds"
     pure Config{..}

@@ -78,6 +78,7 @@ library
                     , Agent.Bob.Data.Message
                     , Agent.Bob.Data.Resolution
                     , Agent.Bob.Data.Role
+                    , Agent.Bob.Data.Skill
                     , Agent.Bob.Data.Task
                     , Agent.Bob.Data.Temperature
                     , Agent.Bob.Data.Thinking
@@ -96,6 +97,7 @@ library
                     , Agent.Bob.ProjectRoot
                     , Agent.Bob.Prompt
                     , Agent.Bob.Prompt.Build
+                    , Agent.Bob.Skill
                     , Agent.Bob.Soul
                     , Agent.Bob.Tool
                     , Agent.Bob.Tool.ReadFiles
@@ -140,6 +142,7 @@ library
                     , directory
                     , extra
                     , filepath
+                    , frontmatter
                     , heftia
                     , heftia-effects
                     , http-client

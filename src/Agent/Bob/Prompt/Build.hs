@@ -59,12 +59,20 @@ buildPrompt AgentInput{..} =
           ]
         availableToolsStr = Text.intercalate "\n"
           $ "### AVAILABLE TOOLS" : toolDescriptions
+        availableSkillsStr = Text.intercalate "\n" $ "### AVAILABLE SKILLS" :
+          case modelSkills of
+            [] -> ["None."]
+            _  ->
+              [ "To use a skill, read its file with the read_files tool."
+              , toPrompt modelSkills
+              ]
         content = Text.intercalate "\n\n"
           [ personaStr
           , modelSoul
           , tasksStr modelTasks
           , responseFormatStr
           , availableToolsStr
+          , availableSkillsStr
           ]
     in  Message {role=System, thinking=Nothing, ..}
 

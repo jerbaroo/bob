@@ -7,10 +7,13 @@ import System.Directory (doesDirectoryExist, doesPathExist, makeAbsolute)
 import System.FilePath (takeDirectory, (</>))
 import System.IO qualified as IO
 
--- | The directory under the project root holding Bob's per-project files
--- (soul, memory, skills, ...): @<root>/agent-bob/@.
-projectDir :: FilePath
-projectDir = "agent-bob"
+-- | The directory under the project root holding Agent Bob configuration.
+agentBobDir :: FilePath
+agentBobDir = "agent-bob"
+
+-- | The directory under the project root holding agent configuration.
+agentsDir :: FilePath
+agentsDir = ".agents"
 
 -- | Find the git project root by walking up from the given directory looking
 -- for a @.git@ entry. 'Nothing' when no ancestor contains one (not a repo).

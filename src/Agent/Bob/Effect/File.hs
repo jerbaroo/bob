@@ -9,11 +9,16 @@ import Agent.Bob.Prelude hiding (readFile)
 import Control.Exception (IOException, try)
 import Data.Text.IO qualified as Text.IO
 import System.Directory (createDirectoryIfMissing, getHomeDirectory, makeAbsolute)
+import System.Directory qualified as Directory
 import System.FilePath (takeDirectory, (</>))
 import System.IO.Error (isDoesNotExistError)
 
 data File :: Effect where
-  AppendFile     :: Text -> Text -> File f ()
+  AppendFile        :: Text -> Text -> File f ()
+  DoesDirectoryExist :: Text -> File f Bool
+  -- | List a directory's entries (names only). Throws if the directory can't
+  -- be read; guard with 'DoesDirectoryExist' when absence is expected.
+  ListDirectory  :: Text -> File f [Text]
   -- | Read a file, surfacing the 'IOException' on failure so callers can tell a
   -- missing file apart from a real error.
   ReadFile :: Text -> File f (Either IOException Text)
@@ -39,6 +44,12 @@ runFile root = interpret \case
     path <- resolve root $ from filePath
     createDirectoryIfMissing True $ takeDirectory path
     Text.IO.appendFile path content
+  DoesDirectoryExist filePath -> liftIO do
+    path <- resolve root $ from filePath
+    Directory.doesDirectoryExist path
+  ListDirectory filePath -> liftIO do
+    path <- resolve root $ from filePath
+    fmap from <$> Directory.listDirectory path
   ResolvePath filePath -> liftIO $ from <$> resolve root (from filePath)
   WriteFile filePath content -> liftIO do
     path <- resolve root $ from filePath

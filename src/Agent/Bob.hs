@@ -15,6 +15,8 @@ import Agent.Bob.Effect.Agent (runAgent)
 import Agent.Bob.Effect.Console (runConsole, writeSection)
 import Agent.Bob.Effect.File (readFileLogErr, runFile)
 import Agent.Bob.Permissions (readPermissions, renderPermissions)
+import Agent.Bob.Prompt (ToPrompt(..))
+import Agent.Bob.Skill (getSkills)
 import Agent.Bob.Pretty (Pretty(..))
 import Agent.Bob.UserCommand.Registry (parseCommand)
 import Control.Monad (filterM)
@@ -48,6 +50,15 @@ restoreSession agentId = do
   when (malformed > 0) $ writeSection System Error $
     "Skipped " <> pretty malformed <> " malformed event line(s) during restore."
 
+-- | Scan the configured skills directories, store the result in state, and
+-- print what was found.
+loadSkills :: Harness es => Eff es ()
+loadSkills = do
+  found <- getSkills
+  writeSection System Info $ case found of
+    [] -> "No skills found."
+    _  -> "Skills:\n" <> toPrompt found
+
 -- | Point the user at @/init@ when any referenced config file is missing.
 checkInitFiles :: Harness es => Eff es ()
 checkInitFiles = do
@@ -74,6 +85,7 @@ main = do
     writeSection System Info $ "Hi. I'm Bob. Type /help for assistance.\n\n" <> pretty config
     checkInitFiles
     readPermissions >>= writeSection System Info . renderPermissions
+    loadSkills
     let agentId = AgentId 0
     restoreSession agentId
     run agentId

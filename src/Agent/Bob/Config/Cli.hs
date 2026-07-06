@@ -4,7 +4,7 @@ import Agent.Bob.Data.Config (ConfigF(..), PartialConfig, defaultConfigPath)
 import Agent.Bob.Data.Level (Level, parseLevel)
 import Agent.Bob.Data.Temperature (Temperature(..))
 import Agent.Bob.Prelude
-import Options.Applicative ((<**>), Parser, ParserInfo, auto, eitherReader, fullDesc, header, help, helper, info, long, metavar, option, optional, progDesc, strOption)
+import Options.Applicative ((<**>), Parser, ParserInfo, auto, eitherReader, fullDesc, header, help, helper, info, long, many, metavar, option, optional, progDesc, strOption)
 
 -- | Parse command-line flags into a 'PartialConfig'.
 partialConfig :: Parser PartialConfig
@@ -33,6 +33,11 @@ partialConfig = Config
        <> help "Granted-permissions file" ))
   -- 'projectRoot' is derived from the git root at startup, not settable.
   <*> pure Nothing
+  -- 'skillsPaths' is additive: repeated flags combine with the file/default
+  -- sources rather than overriding them. 'Nothing' when none are given.
+  <*> (nonEmpty' <$> many (strOption
+        ( long "skills-path" <> metavar "DIR"
+       <> help "Directory of skills to scan (repeatable; added to other sources)" )))
   -- 'soulPath' is optional in a resolved config, so a partial config nests it:
   -- @Just (Just p)@ = set this soul, @Nothing@ = unspecified.
   <*> optional (Just <$> strOption
@@ -48,6 +53,11 @@ parserInfo = info (partialConfig <**> helper)
   ( fullDesc
  <> header "agent-bob - a minimal agent harness"
  <> progDesc "Flags override the project config file, which overrides the global config file, which overrides the defaults." )
+
+-- | An empty list means "unspecified"; a non-empty one is a set of overrides.
+nonEmpty' :: [a] -> Maybe [a]
+nonEmpty' [] = Nothing
+nonEmpty' xs = Just xs
 
 -- | 'parseLevel' adapted to optparse's 'String'-based reader.
 readLevel :: String -> Either String Level

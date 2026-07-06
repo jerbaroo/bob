@@ -7,7 +7,7 @@ import Agent.Bob.Data.Level (Level(..))
 import Agent.Bob.Effect.Console (runConsole)
 import Agent.Bob.Effect.File (readFileMaybe, runFile)
 import Agent.Bob.Prelude
-import Agent.Bob.ProjectRoot (findProjectRoot, projectDir, sessionKey)
+import Agent.Bob.ProjectRoot (agentBobDir, agentsDir, findProjectRoot, sessionKey)
 import Data.Text qualified as Text
 import Options.Applicative (execParser)
 import System.Directory (getCurrentDirectory)
@@ -23,12 +23,13 @@ defaultConfig root key = Config
   { configPath = defaultConfigPath
   , engineUrl = "http://127.0.0.1:8080/v1/chat/completions"
   , logLevel = Debug
-  , memoryPath = from $ projectDir </> "memory" </> "episodic" </> from key
+  , memoryPath = from $ agentBobDir </> "sessions" </> from key
   , modelName = "Qwen"
   , modelTemperature = 0.5
-  , permissionsPath = from $ projectDir </> "permissions"
+  , permissionsPath = from $ agentBobDir </> "permissions"
   , projectRoot = from root
-  , soulPath = Just $ from $ projectDir </> "SOUL.md"
+  , skillsPaths = [from $ agentsDir </> "skills"]
+  , soulPath = Just $ from $ agentBobDir </> "SOUL.md"
   , timeoutSeconds = 10 * 60 -- 10 minutes.
   }
 

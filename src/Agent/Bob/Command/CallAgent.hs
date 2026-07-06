@@ -17,6 +17,7 @@ import Agent.Bob.Effect.File (File)
 import Agent.Bob.Prelude
 import Agent.Bob.Pretty (Pretty(..))
 import Agent.Bob.Prompt.Build (buildPrompt)
+import Agent.Bob.Skill (getSkills)
 import Agent.Bob.Soul (getSoul)
 import Data.Aeson qualified as Aeson
 import Data.Map qualified as Map
@@ -64,6 +65,7 @@ mkAgentInput
 mkAgentInput agentId = do
   Config{modelName} <- ask
   modelSoul <- getSoul
+  modelSkills <- getSkills
   HarnessState{..} <- get
   pure AgentInput
     { events = fromMaybe [] $ Map.lookup agentId events

@@ -2,6 +2,7 @@ module Agent.Bob.Data.AgentInput where
 
 import Agent.Bob.Data.Task (Task)
 import Agent.Bob.Data.Event (Event)
+import Agent.Bob.Data.Skill (Skill)
 import Agent.Bob.Data.Temperature (Temperature)
 import Agent.Bob.Prelude
 
@@ -12,6 +13,8 @@ data AgentInput = AgentInput
   --   May be a compressed version of the full history.
   , modelName :: Text
   , modelTemperature :: Temperature
+  , modelSkills :: [Skill]
+  -- ^ Skills available to pull in on demand.
   , modelSoul :: Text
   , modelTasks :: [Task]
   -- ^ Current tasks to complete.
