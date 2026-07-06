@@ -3,6 +3,7 @@ module Main (main) where
 import Agent.Bob.Prelude
 import Test.Config qualified
 import Test.Event qualified
+import Test.File qualified
 import Test.Hspec (hspec)
 import Test.ProjectRoot qualified
 import Test.Schema qualified
@@ -13,3 +14,4 @@ main = hspec $ do
   Test.Schema.spec
   Test.Config.spec
   Test.ProjectRoot.spec
+  Test.File.spec
