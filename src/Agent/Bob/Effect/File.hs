@@ -22,6 +22,7 @@ data File :: Effect where
   -- | Read a file, surfacing the 'IOException' on failure so callers can tell a
   -- missing file apart from a real error.
   ReadFile :: Text -> File f (Either IOException Text)
+  RenameFile     :: Text -> Text -> File f ()
   ResolvePath    :: Text -> File f Text
   WriteFile      :: Text -> Text -> File f ()
 makeEffectF ''File
@@ -50,6 +51,10 @@ runFile root = interpret \case
   ListDirectory filePath -> liftIO do
     path <- resolve root $ from filePath
     fmap from <$> Directory.listDirectory path
+  RenameFile fromPath toPath -> liftIO do
+    fromPath' <- resolve root $ from fromPath
+    toPath' <- resolve root $ from toPath
+    Directory.renameFile fromPath' toPath'
   ResolvePath filePath -> liftIO $ from <$> resolve root (from filePath)
   WriteFile filePath content -> liftIO do
     path <- resolve root $ from filePath

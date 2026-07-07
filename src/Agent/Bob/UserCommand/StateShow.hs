@@ -35,6 +35,7 @@ instance IsCommand StateShow where
               [] -> "(none)"
               _  -> Text.intercalate ", " userActivatedSkills)
           , ("model_temperature", pretty modelTemperature)
+          , ("session", sessionPath)
           , ("session_history", counted entries "entry" "entries")
           , ("skills_found", pretty $ length skills)
           , ("soul_source", fromMaybe "(built-in default)" soulPath)

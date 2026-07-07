@@ -17,14 +17,14 @@ import System.FilePath ((</>))
 -- | The defaults, overridden by the config files, overridden by the CLI.
 -- Takes the project root (see 'findProjectRoot') and the session key (see
 -- 'sessionKey'). Relative paths are resolved against the project root by the
--- File effect, so episodic memory lives in the project, keyed by branch.
+-- File effect, so session history lives in the project.
 defaultConfig :: FilePath -> Text -> Config
 defaultConfig root key = Config
   { configPath = defaultConfigPath
   , engineUrl = "http://127.0.0.1:8080/v1/chat/completions"
   , gitBranch = key
   , logLevel = Debug
-  , memoryPath = from $ agentBobDir </> "sessions" </> from key
+  , memoryPath = from $ agentBobDir </> "memory" </> "episodic"
   , modelName = "Qwen"
   , modelTemperature = 0.5
   , noAsk = False

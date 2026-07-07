@@ -20,6 +20,9 @@ data HarnessState = HarnessState
   , tasks :: Map AgentId [Task]
   -- ^ The current tasks per-agent.
   , modelTemperature :: Temperature
+  , sessionPath :: Text
+  -- ^ The file this session's history is appended to. State, not Config: the
+  -- user can rename (@/name@) or switch (@/resume@) it at runtime.
   , skills :: [Skill]
   -- ^ Skills as of the last scan. Rescanned at startup and before each model
   -- call (so newly added skills appear without a restart), then injected into
@@ -32,11 +35,12 @@ data HarnessState = HarnessState
   -- content is included in every prompt; the rest stay opt-in for the model.
   }
 
-mkHarnessState :: Config -> HarnessState
-mkHarnessState Config{..} = HarnessState
+mkHarnessState :: Config -> Text -> HarnessState
+mkHarnessState Config{..} sessionPath = HarnessState
   { events = Map.empty
   , loggingRole = Nothing
   , modelTemperature
+  , sessionPath
   , skills = []
   , soulText = Nothing
   , tasks = Map.empty

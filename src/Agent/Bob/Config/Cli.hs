@@ -23,7 +23,7 @@ partialConfig = Config
        <> help "One of: debug, info, meta, thinking" ))
   <*> optional (strOption
         ( long "memory-path" <> metavar "PATH"
-       <> help "Session history file to read and append to" ))
+       <> help "Directory holding the session history files" ))
   <*> optional (strOption
         ( long "model-name" <> metavar "NAME"
        <> help "Model to call" ))

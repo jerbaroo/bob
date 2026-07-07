@@ -1,12 +1,11 @@
 module Agent.Bob.Command where
 
 import Agent.Bob.Data.AgentId (AgentId)
-import Agent.Bob.Data.Config (Config, ConfigF(..))
+import Agent.Bob.Data.Config (Config)
 import Agent.Bob.Data.Event (Event, IsEvent(..), envelope, eventName)
 import Agent.Bob.Data.HarnessState (HarnessState(..))
 import Agent.Bob.Data.Level (Level(..))
 import Agent.Bob.Data.Role (Role(..))
-import Agent.Bob.Effect.Agent (Agent)
 import Agent.Bob.Effect.Clock (Clock, getTime)
 import Agent.Bob.Effect.Console (Console, writeSection)
 import Agent.Bob.Effect.File (File, appendFile)
@@ -51,11 +50,11 @@ recordEvents agentId newEvents = do
         eventTasks =<< lastMay newEvents
     , ..
     }
-  memoryPath <- asks (.memoryPath)
+  sessionPath <- gets (.sessionPath)
   time <- getTime
   forM_ newEvents $ \(event :: e) -> do
     writeSection System Meta $ "Recorded event: " <> eventName @e
-    appendFile memoryPath $ compact (envelope time event) <> "\n"
+    appendFile sessionPath $ compact (envelope time event) <> "\n"
 
 -- | Run a command, record the events, and return the command result.
 step

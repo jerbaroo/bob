@@ -9,6 +9,7 @@ import Test.Permission qualified
 import Test.ProjectRoot qualified
 import Test.Prompt qualified
 import Test.Schema qualified
+import Test.Session qualified
 
 main :: IO ()
 main = hspec $ do
@@ -19,3 +20,4 @@ main = hspec $ do
   Test.File.spec
   Test.Permission.spec
   Test.Prompt.spec
+  Test.Session.spec

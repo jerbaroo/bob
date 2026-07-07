@@ -10,7 +10,9 @@ import Agent.Bob.UserCommand.AgentCall (AgentCall)
 import Agent.Bob.UserCommand.ConfigShow (ConfigShow)
 import Agent.Bob.UserCommand.DeactivateSkill (DeactivateSkill)
 import Agent.Bob.UserCommand.Init (Init)
+import Agent.Bob.UserCommand.Name (Name)
 import Agent.Bob.UserCommand.PermissionsShow (PermissionsShow)
+import Agent.Bob.UserCommand.Resume (Resume)
 import Agent.Bob.UserCommand.Soul (Soul)
 import Agent.Bob.UserCommand.StateShow (StateShow)
 
@@ -26,7 +28,9 @@ baseUserCommands =
   [ SomeUserCommand $ Proxy @ConfigShow
   , SomeUserCommand $ Proxy @DeactivateSkill
   , SomeUserCommand $ Proxy @Init
+  , SomeUserCommand $ Proxy @Name
   , SomeUserCommand $ Proxy @PermissionsShow
+  , SomeUserCommand $ Proxy @Resume
   , SomeUserCommand $ Proxy @Soul
   , SomeUserCommand $ Proxy @StateShow
   -- Must be second last:
