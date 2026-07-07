@@ -22,6 +22,7 @@ baseConfig = Config
   , memoryPath = "default-memory"
   , modelName = "DefaultModel"
   , modelTemperature = 0.5
+  , noAsk = False
   , permissionsPath = "default-perms"
   , projectRoot = "default-root"
   , skillsPaths = []

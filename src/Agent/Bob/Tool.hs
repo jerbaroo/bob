@@ -21,6 +21,9 @@ class Typeable t => IsTool t where
   type ToolOutput t
   -- | Decide whether a single permission grant covers this invocation.
   permissionGranted :: (File :> es) => t -> Text -> Eff es Bool
+  -- | The grant parameter a permission request for this invocation should
+  -- carry (shown to the user, persisted on "always").
+  permissionParam :: t -> Text
   -- | Render the tool output for the model.
   renderOutput :: t -> ToolOutput t -> Text
   -- | Run a tool to produce a result.
@@ -36,6 +39,9 @@ toolName = from $ showTyCon @t
 
 toolName' :: Tool -> ToolName
 toolName' (Tool (_ :: t)) = toolName @t
+
+toolParam' :: Tool -> Text
+toolParam' (Tool t) = permissionParam t
 
 -- | Run a tool and render its output to 'Text'.
 runToolForModel :: (File :> es) => Tool -> Eff es Text

@@ -27,6 +27,7 @@ defaultConfig root key = Config
   , memoryPath = from $ agentBobDir </> "sessions" </> from key
   , modelName = "Qwen"
   , modelTemperature = 0.5
+  , noAsk = False
   , permissionsPath = from $ agentBobDir </> "permissions"
   , projectRoot = from root
   , skillsPaths = [from $ agentsDir </> "skills"]

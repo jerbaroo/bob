@@ -6,13 +6,15 @@ import Agent.Bob.Command.CallAgent qualified as CallAgent
 import Agent.Bob.Data.AgentOutput (AgentMessageContent(..), AgentOutput(..))
 import Agent.Bob.Data.Event (IsEvent(..))
 import Agent.Bob.Data.Level (Level(..))
+import Agent.Bob.Data.Permission (Decision(..))
 import Agent.Bob.Data.Role (Role(..))
 import Agent.Bob.Data.ToolResult (ToolResult(..))
 import Agent.Bob.Data.UserInput (UserInput)
 import Agent.Bob.Effect.Console (writeSection)
+import Agent.Bob.Effect.Permission (requestPermission)
 import Agent.Bob.Permissions (checkPermission)
 import Agent.Bob.Prelude
-import Agent.Bob.Tool (runToolForModel, toolName')
+import Agent.Bob.Tool (runToolForModel, toolName', toolParam')
 import Agent.Bob.UserCommand (IsUserCommand(..))
 
 -- | Call the agent with the user's input and run any tools it requests. This
@@ -39,17 +41,20 @@ instance IsCommand AgentCall where
       tools -> do
         outcomes <- forM tools \tool -> do
           let name = into @Text $ toolName' tool
+              run = do
+                result <- runToolForModel tool
+                writeSection System Info $ name <> " tool output:\n" <> result
+                pure result
+          -- Unpermitted: ask the user. A denial becomes the tool's output so
+          -- the model can adapt, rather than crashing the harness.
           toolOutput <- checkPermission tool >>= \case
-            -- Denied: surface the reason to the model as the tool output so it
-            -- can adapt, rather than crashing the harness.
-            False -> do
-              let reason = "No permission for tool " <> name
-              writeSection System Error reason
-              pure reason
-            True -> do
-              result <- runToolForModel tool
-              writeSection System Info $ name <> " tool output:\n" <> result
-              pure result
+            True -> run
+            False -> requestPermission (toolName' tool) (toolParam' tool) >>= \case
+              Deny -> do
+                let reason = "No permission for tool " <> name
+                writeSection System Error reason
+                pure reason
+              _ -> run
           pure $ ToolResult (toolName' tool) toolOutput
         recordEvents agentId $ from <$> outcomes
         output' <- step agentId CallAgent.CallAgent

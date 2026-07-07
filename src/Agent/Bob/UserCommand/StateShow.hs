@@ -2,7 +2,7 @@ module Agent.Bob.UserCommand.StateShow where
 
 import Data.Aeson qualified as Aeson
 import Agent.Bob.Command (IsCommand(..))
-import Agent.Bob.Data.Config (Config, ConfigF(..))
+import Agent.Bob.Data.Config (ConfigF(..))
 import Agent.Bob.Data.Event (IsEvent(..))
 import Agent.Bob.Data.HarnessState (HarnessState(..))
 import Agent.Bob.Data.Level (Level(..))

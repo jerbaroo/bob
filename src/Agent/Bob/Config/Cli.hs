@@ -4,7 +4,7 @@ import Agent.Bob.Data.Config (ConfigF(..), PartialConfig, defaultConfigPath)
 import Agent.Bob.Data.Level (Level, parseLevel)
 import Agent.Bob.Data.Temperature (Temperature(..))
 import Agent.Bob.Prelude
-import Options.Applicative ((<**>), Parser, ParserInfo, auto, eitherReader, fullDesc, header, help, helper, info, long, many, metavar, option, optional, progDesc, strOption)
+import Options.Applicative ((<**>), Parser, ParserInfo, auto, eitherReader, flag, fullDesc, header, help, helper, info, long, many, metavar, option, optional, progDesc, strOption)
 
 -- | Parse command-line flags into a 'PartialConfig'.
 partialConfig :: Parser PartialConfig
@@ -30,6 +30,9 @@ partialConfig = Config
   <*> optional (Temperature <$> option auto
         ( long "model-temp" <> metavar "FLOAT"
        <> help "Sampling temperature" ))
+  <*> flag Nothing (Just True)
+        ( long "no-ask"
+       <> help "Deny unpermitted tool calls instead of prompting" )
   <*> optional (strOption
         ( long "permissions-path" <> metavar "PATH"
        <> help "Granted-permissions file" ))

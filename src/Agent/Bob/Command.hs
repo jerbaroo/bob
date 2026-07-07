@@ -7,23 +7,14 @@ import Agent.Bob.Data.HarnessState (HarnessState(..))
 import Agent.Bob.Data.Level (Level(..))
 import Agent.Bob.Data.Role (Role(..))
 import Agent.Bob.Effect.Agent (Agent)
-import Agent.Bob.Effect.Clock (Clock)
+import Agent.Bob.Effect.Clock (Clock, getTime)
 import Agent.Bob.Effect.Console (Console, writeSection)
 import Agent.Bob.Effect.File (File, appendFile)
+import Agent.Bob.Effect.Harness (Harness)
 import Agent.Bob.Prelude hiding (appendFile)
 import Agent.Bob.Pretty (compact)
 import Data.Aeson qualified as Aeson
 import Data.Map qualified as Map
-
--- | The effects every command is allowed to use.
-type Harness es =
-  ( Agent :> es
-  , Ask Config :> es
-  , Clock :> es
-  , Console :> es
-  , File :> es
-  , State HarnessState :> es
-  )
 
 -- | An existential wrapper over any concrete command.
 data Command = forall c. (Aeson.ToJSON c, IsCommand c, IsEvent c) => Command c

@@ -1,7 +1,7 @@
 module Agent.Bob where
 
 import Agent.Bob.Prelude hiding (readFile)
-import Agent.Bob.Command (Command(..), Harness, step)
+import Agent.Bob.Command (Command(..), step)
 import Agent.Bob.Command.CallAgent (mkAgentInput)
 import Agent.Bob.Command.ReadConsole (ReadConsole(..))
 import Agent.Bob.Config (loadConfig)
@@ -16,6 +16,8 @@ import Agent.Bob.Effect.Agent (runAgent)
 import Agent.Bob.Effect.Clock (runClock)
 import Agent.Bob.Effect.Console (runConsole, writeSection)
 import Agent.Bob.Effect.File (readFileLogErr, runFile)
+import Agent.Bob.Effect.Harness (Harness)
+import Agent.Bob.Effect.Permission (runPermissionAsk, runPermissionDeny)
 import Agent.Bob.Permissions (readPermissions, renderPermissions)
 import Agent.Bob.Prompt.Build (renderContextBreakdown)
 import Agent.Bob.Skill (getSkills)
@@ -85,7 +87,8 @@ main :: IO ()
 main = do
   config <- loadConfig
   let initialState = mkHarnessState config
-  runEff . runAsk config . runAgent . runConsole . runClock . runFile (from config.projectRoot) . evalStateIORef initialState $ do
+  let runPermission = if config.noAsk then runPermissionDeny else runPermissionAsk
+  runEff . runAsk config . runAgent . runConsole . runClock . runFile (from config.projectRoot) . evalStateIORef initialState . runPermission $ do
     writeSection System Info $ "Hi. I'm Bob. Type /help for assistance.\n\n" <> pretty config
     checkInitFiles
     readPermissions >>= writeSection System Info . renderPermissions

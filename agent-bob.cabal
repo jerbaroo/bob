@@ -90,6 +90,8 @@ library
                     , Agent.Bob.Effect.Clock
                     , Agent.Bob.Effect.Console
                     , Agent.Bob.Effect.File
+                    , Agent.Bob.Effect.Harness
+                    , Agent.Bob.Effect.Permission
                     , Agent.Bob.Glob
                     , Agent.Bob.Permissions
                     , Agent.Bob.Prelude
@@ -200,6 +202,7 @@ test-suite agent-bob-test
     other-modules:    Test.Config
                     , Test.Event
                     , Test.File
+                    , Test.Permission
                     , Test.ProjectRoot
                     , Test.Prompt
                     , Test.Schema

@@ -35,6 +35,8 @@ instance IsTool ReadFiles where
     and <$> traverse
       (\f -> Glob.matches glob <$> resolvePath (directory <> "/" <> f))
       files
+  -- A grant for this invocation covers future reads in the same directory.
+  permissionParam ReadFiles{..} = directory <> "/*"
   renderOutput _ = Text.intercalate "\n\n" . fmap render
    where
     render (path, Just c)  = "== " <> path <> " ==\n" <> c

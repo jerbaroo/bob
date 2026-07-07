@@ -33,6 +33,8 @@ data ConfigF f = Config
   , memoryPath :: HKD f Text
   , modelName :: HKD f Text
   , modelTemperature :: HKD f Temperature
+  , noAsk :: HKD f Bool
+  -- ^ Deny unpermitted tool calls outright instead of prompting the user.
   , permissionsPath :: HKD f Text
   , projectRoot :: HKD f Text
   -- ^ Derived from the git root (or CWD) at startup, not user-configurable.
@@ -59,6 +61,7 @@ instance Pretty Config where
           , Just ("memory_path", memoryPath)
           , Just ("model_name", modelName)
           , Just ("model_temperature", pretty modelTemperature)
+          , Just ("no_ask", if noAsk then "true" else "false")
           , Just ("permissions_path", permissionsPath)
           , Just ("project_root", projectRoot)
           , Just ("skills_paths", Text.intercalate ", " skillsPaths)
@@ -77,6 +80,7 @@ emptyPartial = Config
   , memoryPath = Nothing
   , modelName = Nothing
   , modelTemperature = Nothing
+  , noAsk = Nothing
   , permissionsPath = Nothing
   , projectRoot = Nothing
   , skillsPaths = Nothing
@@ -97,6 +101,7 @@ instance Semigroup PartialConfig where
     , memoryPath = a.memoryPath <|> b.memoryPath
     , modelName = a.modelName <|> b.modelName
     , modelTemperature = a.modelTemperature <|> b.modelTemperature
+    , noAsk = a.noAsk <|> b.noAsk
     , permissionsPath = a.permissionsPath <|> b.permissionsPath
     , projectRoot = a.projectRoot <|> b.projectRoot
     -- Additive across sources (not left-biased): combine both lists.
@@ -115,6 +120,7 @@ applyPartial p c = Config
   , memoryPath = fromMaybe c.memoryPath p.memoryPath
   , modelName = fromMaybe c.modelName p.modelName
   , modelTemperature = fromMaybe c.modelTemperature p.modelTemperature
+  , noAsk = fromMaybe c.noAsk p.noAsk
   , permissionsPath = fromMaybe c.permissionsPath p.permissionsPath
   , projectRoot = fromMaybe c.projectRoot p.projectRoot
   -- Additive: the configured paths are added to the default, not replacing it.
@@ -140,6 +146,7 @@ instance Aeson.FromJSON PartialConfig where
     memoryPath <- o .:? "memory_path"
     modelName <- o .:? "model_name"
     modelTemperature <- o .:? "model_temperature"
+    noAsk <- o .:? "no_ask"
     permissionsPath <- o .:? "permissions_path"
     -- Derived from the git root at startup; configuring it makes no sense.
     projectRoot <- o .:? "project_root" >>= \case
