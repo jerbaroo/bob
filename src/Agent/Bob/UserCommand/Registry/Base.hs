@@ -21,11 +21,12 @@ data SomeUserCommand
 -- renders this list and so cannot appear in it without an import cycle.
 baseUserCommands :: [SomeUserCommand]
 baseUserCommands =
-  [ SomeUserCommand $ Proxy @ActivateSkill
-  , SomeUserCommand $ Proxy @ConfigShow
+  [ SomeUserCommand $ Proxy @ConfigShow
   , SomeUserCommand $ Proxy @Init
   , SomeUserCommand $ Proxy @PermissionsShow
   , SomeUserCommand $ Proxy @Soul
+  -- Must be second last:
+  , SomeUserCommand $ Proxy @ActivateSkill
   -- Must be last:
   , SomeUserCommand $ Proxy @AgentCall
   ]

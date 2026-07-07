@@ -87,6 +87,7 @@ library
                     , Agent.Bob.Data.Permission
                     , Agent.Bob.Data.UserInput
                     , Agent.Bob.Effect.Agent
+                    , Agent.Bob.Effect.Clock
                     , Agent.Bob.Effect.Console
                     , Agent.Bob.Effect.File
                     , Agent.Bob.Glob
@@ -153,6 +154,7 @@ library
                     , request
                     , safe
                     , text
+                    , time
                     , witch
 
     -- Directories containing source files.

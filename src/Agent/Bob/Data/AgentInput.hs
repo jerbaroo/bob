@@ -5,12 +5,17 @@ import Agent.Bob.Data.Event (Event)
 import Agent.Bob.Data.Skill (Skill)
 import Agent.Bob.Data.Temperature (Temperature)
 import Agent.Bob.Prelude
+import Data.Time.Clock (UTCTime)
 
 -- | Input available to an agent.
 data AgentInput = AgentInput
-  { events :: [Event]
+  { currentTime :: UTCTime
+  -- ^ For the prompt's ENVIRONMENT section; fetched per call so the prompt
+  --   builder stays pure.
+  , events :: [Event]
   -- ^ History of events, including user input and tool results.
   --   May be a compressed version of the full history.
+  , gitBranch :: Text
   , modelName :: Text
   , modelSkills :: [Skill]
   -- ^ Skills the model may pull in on demand (not user-activated).
@@ -21,4 +26,6 @@ data AgentInput = AgentInput
   , modelTemperature :: Temperature
   , modelTasks :: [Task]
   -- ^ Current tasks to complete.
+  , operatingSystem :: Text
+  , projectRoot :: Text
   }

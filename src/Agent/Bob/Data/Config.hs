@@ -26,6 +26,9 @@ type family HKD f a where
 data ConfigF f = Config
   { configPath :: HKD f Text
   , engineUrl :: HKD f Text
+  , gitBranch :: HKD f Text
+  -- ^ Derived from @.git/HEAD@ at startup (sanitised branch, short SHA when
+  -- detached, or @default@ outside a repo), not user-configurable.
   , logLevel :: HKD f Level
   , memoryPath :: HKD f Text
   , modelName :: HKD f Text
@@ -51,6 +54,7 @@ instance Pretty Config where
     let prettyConfig = pretty $ catMaybes
           [ Just ("config_path", configPath)
           , Just ("engine_url", engineUrl)
+          , Just ("git_branch", gitBranch)
           , Just ("log_level" :: Text, pretty logLevel)
           , Just ("memory_path", memoryPath)
           , Just ("model_name", modelName)
@@ -68,6 +72,7 @@ emptyPartial :: PartialConfig
 emptyPartial = Config
   { configPath = Nothing
   , engineUrl = Nothing
+  , gitBranch = Nothing
   , logLevel = Nothing
   , memoryPath = Nothing
   , modelName = Nothing
@@ -87,6 +92,7 @@ instance Semigroup PartialConfig where
   a <> b = Config
     { configPath = a.configPath <|> b.configPath
     , engineUrl = a.engineUrl <|> b.engineUrl
+    , gitBranch = a.gitBranch <|> b.gitBranch
     , logLevel = a.logLevel <|> b.logLevel
     , memoryPath = a.memoryPath <|> b.memoryPath
     , modelName = a.modelName <|> b.modelName
@@ -104,6 +110,7 @@ applyPartial :: PartialConfig -> Config -> Config
 applyPartial p c = Config
   { configPath = fromMaybe c.configPath p.configPath
   , engineUrl = fromMaybe c.engineUrl p.engineUrl
+  , gitBranch = fromMaybe c.gitBranch p.gitBranch
   , logLevel = fromMaybe c.logLevel p.logLevel
   , memoryPath = fromMaybe c.memoryPath p.memoryPath
   , modelName = fromMaybe c.modelName p.modelName
@@ -125,6 +132,10 @@ instance Aeson.FromJSON PartialConfig where
       Nothing -> pure Nothing
       Just (_ :: Text) -> fail "config_path should not exist in config file"
     engineUrl <- o .:? "engine_url"
+    -- Derived from .git/HEAD at startup; configuring it makes no sense.
+    gitBranch <- o .:? "git_branch" >>= \case
+      Nothing -> pure Nothing
+      Just (_ :: Text) -> fail "git_branch should not exist in config file"
     logLevel <- o .:? "log_level"
     memoryPath <- o .:? "memory_path"
     modelName <- o .:? "model_name"

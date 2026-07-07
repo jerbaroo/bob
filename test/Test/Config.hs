@@ -17,12 +17,14 @@ baseConfig :: Config
 baseConfig = Config
   { configPath = "default.json"
   , engineUrl = "default-engine"
+  , gitBranch = "default-branch"
   , logLevel = Debug
   , memoryPath = "default-memory"
   , modelName = "DefaultModel"
   , modelTemperature = 0.5
   , permissionsPath = "default-perms"
   , projectRoot = "default-root"
+  , skillsPaths = []
   , soulPath = Nothing
   , timeoutSeconds = 60
   }
@@ -73,6 +75,9 @@ spec = describe "config parsers" $ do
 
   it "rejects project_root in the config file" $
     isLeft (File.parseConfig "{\"project_root\": \"/elsewhere\"}") `shouldBe` True
+
+  it "rejects git_branch in the config file" $
+    isLeft (File.parseConfig "{\"git_branch\": \"other\"}") `shouldBe` True
 
   it "rejects an unknown log level in the config file" $
     isLeft (File.parseConfig "{\"log_level\": \"nope\"}") `shouldBe` True

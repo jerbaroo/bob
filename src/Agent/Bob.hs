@@ -12,6 +12,7 @@ import Agent.Bob.Data.HarnessState (HarnessState(..), mkHarnessState)
 import Agent.Bob.Data.Level (Level(..))
 import Agent.Bob.Data.Role (Role(..))
 import Agent.Bob.Effect.Agent (runAgent)
+import Agent.Bob.Effect.Clock (runClock)
 import Agent.Bob.Effect.Console (runConsole, writeSection)
 import Agent.Bob.Effect.File (readFileLogErr, runFile)
 import Agent.Bob.Permissions (readPermissions, renderPermissions)
@@ -81,7 +82,7 @@ main :: IO ()
 main = do
   config <- loadConfig
   let initialState = mkHarnessState config
-  runEff . runAsk config . runAgent . runConsole . runFile (from config.projectRoot) . evalStateIORef initialState $ do
+  runEff . runAsk config . runAgent . runConsole . runClock . runFile (from config.projectRoot) . evalStateIORef initialState $ do
     writeSection System Info $ "Hi. I'm Bob. Type /help for assistance.\n\n" <> pretty config
     checkInitFiles
     readPermissions >>= writeSection System Info . renderPermissions

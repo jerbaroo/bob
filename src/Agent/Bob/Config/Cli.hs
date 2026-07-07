@@ -16,6 +16,8 @@ partialConfig = Config
   <*> optional (strOption
         ( long "engine-url" <> metavar "URL"
        <> help "Chat-completions endpoint" ))
+  -- 'gitBranch' is derived from .git/HEAD at startup, not settable.
+  <*> pure Nothing
   <*> optional (option (eitherReader readLevel)
         ( long "log-level" <> metavar "LEVEL"
        <> help "One of: debug, info, meta, thinking" ))

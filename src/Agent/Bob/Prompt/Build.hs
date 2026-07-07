@@ -9,6 +9,7 @@ import Agent.Bob.Prompt (ToPrompt(..))
 import Agent.Bob.Tool.Registry (toolCallSchema, toolDescriptions)
 import Data.Aeson qualified as Aeson
 import Data.Text qualified as Text
+import Data.Time.Format (defaultTimeLocale, formatTime)
 
 buildPrompt :: AgentInput -> Aeson.Value
 buildPrompt AgentInput{..} =
@@ -32,6 +33,15 @@ buildPrompt AgentInput{..} =
   systemMessage :: Message
   systemMessage =
     let personaStr = "You are an intelligent assistant responsible for tracking tasks and conversing with the user. The task list is your working memory: use it to keep structure about what you are doing and plan to do."
+        environmentStr = Text.intercalate "\n"
+          [ "### ENVIRONMENT"
+          , "- model: " <> modelName
+          , "- current_time: "
+              <> from (formatTime defaultTimeLocale "%Y-%m-%d %H:%M UTC" currentTime)
+          , "- project_root: " <> projectRoot
+          , "- git_branch: " <> gitBranch
+          , "- os: " <> operatingSystem
+          ]
         tasksStr tasks' = Text.intercalate "\n" $ "### PENDING TASKS" : case tasks' of
           [] -> ["None."]
           _  ->
@@ -76,6 +86,7 @@ buildPrompt AgentInput{..} =
             ] <> [ "#### " <> name <> "\n\n" <> body | (name, body) <- modelSkillsActive ]
         content = Text.intercalate "\n\n" $ filter (not . Text.null)
           [ personaStr
+          , environmentStr
           , modelSoul
           , activeSkillsStr
           , tasksStr modelTasks

@@ -22,6 +22,7 @@ defaultConfig :: FilePath -> Text -> Config
 defaultConfig root key = Config
   { configPath = defaultConfigPath
   , engineUrl = "http://127.0.0.1:8080/v1/chat/completions"
+  , gitBranch = key
   , logLevel = Debug
   , memoryPath = from $ agentBobDir </> "sessions" </> from key
   , modelName = "Qwen"

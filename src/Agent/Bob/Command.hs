@@ -7,6 +7,7 @@ import Agent.Bob.Data.HarnessState (HarnessState(..))
 import Agent.Bob.Data.Level (Level(..))
 import Agent.Bob.Data.Role (Role(..))
 import Agent.Bob.Effect.Agent (Agent)
+import Agent.Bob.Effect.Clock (Clock)
 import Agent.Bob.Effect.Console (Console, writeSection)
 import Agent.Bob.Effect.File (File, appendFile)
 import Agent.Bob.Prelude hiding (appendFile)
@@ -18,6 +19,7 @@ import Data.Map qualified as Map
 type Harness es =
   ( Agent :> es
   , Ask Config :> es
+  , Clock :> es
   , Console :> es
   , File :> es
   , State HarnessState :> es

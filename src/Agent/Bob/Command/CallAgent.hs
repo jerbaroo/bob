@@ -13,6 +13,7 @@ import Agent.Bob.Data.Message (Message(..))
 import Agent.Bob.Data.Role (Role(..))
 import Agent.Bob.Data.Skill (Skill(..))
 import Agent.Bob.Effect.Agent (callAgent)
+import Agent.Bob.Effect.Clock (Clock, getTime)
 import Agent.Bob.Effect.Console (Console, writeSection)
 import Agent.Bob.Effect.File (File, readFileMaybe)
 import Agent.Bob.Prelude
@@ -23,6 +24,7 @@ import Agent.Bob.Soul (getSoul)
 import Data.Aeson qualified as Aeson
 import Data.List (partition)
 import Data.Map qualified as Map
+import System.Info qualified
 
 -- | Call the agent with a prompt built from the recorded events.
 data CallAgent = CallAgent
@@ -62,10 +64,13 @@ instance IsEvent CallAgent where
 
 -- | Input to an agent derived from the harness state.
 mkAgentInput
-  :: (Ask Config :> es, Console :> es, File :> es, State HarnessState :> es)
+  :: ( Ask Config :> es, Clock :> es, Console :> es, File :> es
+     , State HarnessState :> es )
   => AgentId -> Eff es AgentInput
 mkAgentInput agentId = do
-  Config{modelName} <- ask
+  Config{gitBranch, modelName, projectRoot} <- ask
+  currentTime <- getTime
+  let operatingSystem = from System.Info.os
   modelSoul <- getSoul
   allSkills <- getSkills
   activated <- gets (.userActivatedSkills)
