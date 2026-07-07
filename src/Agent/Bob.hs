@@ -2,7 +2,6 @@ module Agent.Bob where
 
 import Agent.Bob.Prelude hiding (readFile)
 import Agent.Bob.Command (Command(..), step)
-import Agent.Bob.Command.CallAgent (mkAgentInput)
 import Agent.Bob.Command.ReadConsole (ReadConsole(..))
 import Agent.Bob.Config (loadConfig)
 import Agent.Bob.Data.Config (ConfigF(..))
@@ -18,7 +17,6 @@ import Agent.Bob.Effect.Harness (Harness)
 import Agent.Bob.Effect.File (doesDirectoryExist, listDirectory)
 import Agent.Bob.Effect.Permission (runPermissionAsk, runPermissionDeny)
 import Agent.Bob.Permissions (readPermissions, renderPermissions)
-import Agent.Bob.Prompt.Build (renderContextBreakdown)
 import Agent.Bob.Session (branchSessions, newSessionPath, restoreSession)
 import Agent.Bob.Skill (getSkills)
 import Agent.Bob.Pretty (Pretty(..))
@@ -82,30 +80,28 @@ sessionInfo :: Harness es => Eff es ()
 sessionInfo = do
   Config{gitBranch, memoryPath, projectRoot} <- ask
   sessionPath <- gets (.sessionPath)
-  writeSection System Info $ "Session: " <> sessionPath
+  writeSection System Info $ "Current session:\n- " <>
+    fromMaybe "" (Text.drop 1 <$> Text.stripPrefix memoryPath sessionPath)
   previous <- doesDirectoryExist memoryPath >>= \case
     False -> pure []
     True  ->
-      branchSessions (from $ takeFileName $ from @Text projectRoot) gitBranch
-        <$> listDirectory memoryPath
+          branchSessions (from $ takeFileName $ from @Text projectRoot) gitBranch
+      <$> listDirectory memoryPath
   unless (null previous) $ writeSection System Info $
-       "Previous sessions (newest first):\n" <> pretty (take 5 previous)
-    <> "\nUse /resume <name> to continue one."
+      "Previous sessions (most recent first, resume with /resume <name>):\n"
+    <> pretty (take 5 previous)
 
 startup :: Harness es => AgentId -> Eff es ()
 startup agentId = do
   writeSection System Info
     . ("Hi. I'm Bob. Type /help for assistance.\n\n" <>) . pretty =<< ask
   checkInitFiles
-  readPermissions >>= writeSection System Info . renderPermissions
-  sessionInfo
   restoreSession agentId =<< gets (.sessionPath)
+  sessionInfo
   -- Tasks restored with the session history, so the user sees what was
   -- still pending when the previous run ended.
   restoredTasks <- gets $ fromMaybe [] . Map.lookup agentId . (.tasks)
   unless (null restoredTasks) $ writeSection System Info $
     "Active tasks:\n" <> pretty restoredTasks
   loadSkills
-  -- What a model call would send right now, so the user sees the size of
-  -- the restored context before the first call.
-  mkAgentInput agentId >>= writeSection System Info . renderContextBreakdown
+  readPermissions >>= writeSection System Info . renderPermissions

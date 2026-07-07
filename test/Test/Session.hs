@@ -1,8 +1,7 @@
 module Test.Session (spec) where
 
 import Agent.Bob.Prelude
-import Agent.Bob.Session (branchSessions, mkSessionName, mkUuid)
-import Data.Text qualified as Text
+import Agent.Bob.Session (branchSessions, mkSessionName, )
 import Data.Time.Calendar (fromGregorian)
 import Data.Time.Clock (UTCTime(..))
 import Test.Hspec (Spec, describe, it, shouldBe)
@@ -32,9 +31,3 @@ spec = describe "sessions" $ do
       , "bob_main_20260707-000002_c"
       , "bob_main_20260707-000001_a"
       ]
-
-  it "generates uuid-shaped ids" $ do
-    u <- mkUuid
-    Text.length u `shouldBe` 36
-    Text.count "-" u `shouldBe` 4
-    Text.index u 14 `shouldBe` '4'

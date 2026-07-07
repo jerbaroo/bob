@@ -16,11 +16,10 @@ import Data.Ord (Down(..))
 import Data.Text qualified as Text
 import Data.Time.Clock (UTCTime, getCurrentTime)
 import Data.Time.Format (defaultTimeLocale, formatTime)
-import Data.Word (Word64)
-import Numeric (showHex)
+import Data.UUID qualified as UUID
+import Data.UUID.V4 qualified as UUID
 import System.Directory (doesFileExist)
 import System.FilePath (takeFileName)
-import System.Random (randomIO)
 
 -- | A fresh session file name: @<root>_<branch>_<timestamp>_<uuid>@, or just
 -- @<timestamp>_<uuid>@ outside a git repository (branch "default"). The
@@ -51,18 +50,6 @@ branchSessions rootName branch = sortOn Down . filter relevant
     "default" -> ""
     _         -> autoNamed <> sanitise branch <> "_"
 
--- | A version-4-shaped UUID, from 'System.Random' (no extra dependency).
-mkUuid :: IO Text
-mkUuid = do
-  a <- randomIO @Word64
-  b <- randomIO @Word64
-  let hex w = Text.justifyRight 16 '0' $ from $ showHex w ""
-      set i c t = Text.take i t <> Text.singleton c <> Text.drop (i + 1) t
-      h = set 12 '4' $ set 16 '8' $ hex a <> hex b
-      slice i n = Text.take n $ Text.drop i h
-  pure $ Text.intercalate "-"
-    [slice 0 8, slice 8 4, slice 12 4, slice 16 4, slice 20 12]
-
 -- | The path (under @memoryPath@) of a fresh session, retrying on the
 -- unlikely collision. Plain IO: runs at startup, before the effect stack.
 newSessionPath :: Config -> IO Text
@@ -70,9 +57,9 @@ newSessionPath config = do
   time <- getCurrentTime
   let rootName = from $ takeFileName $ from @Text config.projectRoot
       attempt = do
-        uuid <- mkUuid
+        uuid <- UUID.nextRandom
         let path = config.memoryPath <> "/"
-              <> mkSessionName rootName config.gitBranch time uuid
+              <> mkSessionName rootName config.gitBranch time (UUID.toText uuid)
         exists <- doesFileExist =<< resolve (from config.projectRoot) (from path)
         if exists then attempt else pure path
   attempt
@@ -96,7 +83,7 @@ restoreSession agentId path = do
     , ..
     }
   writeSection System Info $ case length restored of
-    0 -> "No session history loaded."
+    0 -> "No session history."
     1 -> "Loaded session history (1 entry)."
     n -> "Loaded session history (" <> pretty n <> " entries)."
   when (malformed > 0) $ writeSection System Error $

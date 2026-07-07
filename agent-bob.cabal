@@ -163,6 +163,7 @@ library
                     , safe
                     , text
                     , time
+                    , uuid
                     , witch
 
     -- Directories containing source files.

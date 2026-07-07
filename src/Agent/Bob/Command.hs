@@ -2,7 +2,7 @@ module Agent.Bob.Command where
 
 import Agent.Bob.Data.AgentId (AgentId)
 import Agent.Bob.Data.Config (Config)
-import Agent.Bob.Data.Event (Event, IsEvent(..), envelope, eventName)
+import Agent.Bob.Data.Event (Event(..), IsEvent(..), envelope, eventName)
 import Agent.Bob.Data.HarnessState (HarnessState(..))
 import Agent.Bob.Data.Level (Level(..))
 import Agent.Bob.Data.Role (Role(..))
@@ -52,7 +52,7 @@ recordEvents agentId newEvents = do
     }
   sessionPath <- gets (.sessionPath)
   time <- getTime
-  forM_ newEvents $ \(event :: e) -> do
+  forM_ newEvents $ \(event@(Event (_ :: e))) -> do
     writeSection System Meta $ "Recorded event: " <> eventName @e
     appendFile sessionPath $ compact (envelope time event) <> "\n"
 
