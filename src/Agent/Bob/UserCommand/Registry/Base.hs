@@ -8,9 +8,11 @@ import Agent.Bob.UserCommand (IsUserCommand)
 import Agent.Bob.UserCommand.ActivateSkill (ActivateSkill)
 import Agent.Bob.UserCommand.AgentCall (AgentCall)
 import Agent.Bob.UserCommand.ConfigShow (ConfigShow)
+import Agent.Bob.UserCommand.DeactivateSkill (DeactivateSkill)
 import Agent.Bob.UserCommand.Init (Init)
 import Agent.Bob.UserCommand.PermissionsShow (PermissionsShow)
 import Agent.Bob.UserCommand.Soul (Soul)
+import Agent.Bob.UserCommand.StateShow (StateShow)
 
 -- | An existential over a user command type (not a value).
 data SomeUserCommand
@@ -22,9 +24,11 @@ data SomeUserCommand
 baseUserCommands :: [SomeUserCommand]
 baseUserCommands =
   [ SomeUserCommand $ Proxy @ConfigShow
+  , SomeUserCommand $ Proxy @DeactivateSkill
   , SomeUserCommand $ Proxy @Init
   , SomeUserCommand $ Proxy @PermissionsShow
   , SomeUserCommand $ Proxy @Soul
+  , SomeUserCommand $ Proxy @StateShow
   -- Must be second last:
   , SomeUserCommand $ Proxy @ActivateSkill
   -- Must be last:

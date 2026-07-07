@@ -91,6 +91,11 @@ main = do
     readPermissions >>= writeSection System Info . renderPermissions
     let agentId = AgentId 0
     restoreSession agentId
+    -- Tasks restored with the session history, so the user sees what was
+    -- still pending when the previous run ended.
+    restoredTasks <- gets $ fromMaybe [] . Map.lookup agentId . (.tasks)
+    unless (null restoredTasks) $ writeSection System Info $
+      "Active tasks:\n" <> pretty restoredTasks
     loadSkills
     -- What a model call would send right now, so the user sees the size of
     -- the restored context before the first call.

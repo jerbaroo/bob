@@ -15,7 +15,7 @@ import Agent.Bob.Data.Skill (Skill(..))
 import Agent.Bob.Effect.Agent (callAgent)
 import Agent.Bob.Effect.Clock (Clock, getTime)
 import Agent.Bob.Effect.Console (Console, writeSection)
-import Agent.Bob.Effect.File (File, readFileMaybe)
+import Agent.Bob.Effect.File (File, readFileLogErr)
 import Agent.Bob.Prelude
 import Agent.Bob.Pretty (Pretty(..))
 import Agent.Bob.Prompt.Build (buildPrompt, renderContextBreakdown)
@@ -77,9 +77,10 @@ mkAgentInput agentId = do
   activated <- gets (.userActivatedSkills)
   -- Activated skills are injected in full; the rest stay opt-in for the model.
   let (active, modelSkills) = partition ((`elem` activated) . (.name)) allSkills
-  modelSkillsActive <- forM active \skill ->
-    -- TODO avoid silent failure, print an error.
-    (skill.name,) . fromMaybe "" <$> readFileMaybe skill.path
+  -- An unreadable SKILL.md is reported ('readFileLogErr') and the skill is
+  -- dropped from this call, rather than silently injected as empty text.
+  modelSkillsActive <- fmap catMaybes $ forM active \skill ->
+    fmap (skill.name,) <$> readFileLogErr skill.path
   HarnessState{..} <- get
   pure AgentInput
     { events = fromMaybe [] $ Map.lookup agentId events

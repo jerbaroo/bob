@@ -8,7 +8,10 @@ import Agent.Bob.Data.Level (Level(..))
 import Agent.Bob.Data.Role (Role(..))
 import Agent.Bob.Data.UserInput (UserInput(..))
 import Agent.Bob.Pretty qualified as Pretty
+import Control.Exception (IOException, throwIO, try)
+import System.Exit (exitSuccess)
 import System.IO (hFlush, stdout)
+import System.IO.Error (isEOFError)
 
 data Console :: Effect where
   -- | Read from the console.
@@ -19,7 +22,14 @@ makeEffectF '' Console
 
 runConsole :: Emb IO :> es => Eff (Console : es) ~> Eff es
 runConsole = interpret \case
-  ReadConsole -> liftIO $ from <$> getLine
+  ReadConsole -> liftIO $ try @IOException getLine >>= \case
+    -- Stdin closed (piped input ended, or Ctrl-D): exit cleanly instead of
+    -- crashing with "hGetLine: end of file". Session history is already on
+    -- disk at this point; there is nothing to clean up.
+    Left e
+      | isEOFError e -> putStrLn "" *> exitSuccess
+      | otherwise    -> throwIO e
+    Right line -> pure $ from line
   WriteConsole text -> liftIO do
     putStr $ from text
     hFlush stdout
