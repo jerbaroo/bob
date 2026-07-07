@@ -1,11 +1,13 @@
 module Test.Event (spec) where
 
-import Agent.Bob.Data.Event (Event(..), IsEvent)
+import Agent.Bob.Data.Event (Event(..), IsEvent, envelope)
 import Agent.Bob.Data.Event.Registry (LineResult(..), SomeEvent(..), knownEvents, readEventLine)
 import Agent.Bob.Prelude
 import Agent.Bob.Pretty (compact)
 import Data.Aeson qualified as Aeson
 import Data.Text qualified as Text
+import Data.Time.Calendar (fromGregorian)
+import Data.Time.Clock (UTCTime(..))
 import Test.Hspec (Spec, describe, it, shouldBe)
 import Test.Hspec.QuickCheck qualified as H
 
@@ -49,8 +51,9 @@ jsonRoundtripPropTest = H.prop
   ("JSON roundtrip prop test: " <> Text.unpack (showTyCon @a))
   $ \(a :: a) -> Aeson.eitherDecode (Aeson.encode a) `shouldBe` Right a
 
--- | The full loop through the session log: serialize as a log line, restore
--- via the registry, and compare as JSON (raw 'Event's have no 'Eq').
+-- | The full loop through the session log: serialize as a log line (the
+-- timestamped 'envelope' form 'recordEvents' writes), restore via the
+-- registry, and compare as JSON (raw 'Event's have no 'Eq').
 eventLineRoundtripPropTest
   :: forall e
    . (Aeson.ToJSON e, Arbitrary e, IsEvent e, Show e, Typeable e)
@@ -59,5 +62,6 @@ eventLineRoundtripPropTest = H.prop
   ("Session-log line roundtrip prop test: " <> Text.unpack (showTyCon @e))
   $ \(e :: e) ->
       let event = Event e
-      in  Aeson.toJSON <$> into @(Maybe Event) (readEventLine $ compact event)
+          line = compact $ envelope (UTCTime (fromGregorian 2026 7 7) 0) event
+      in  Aeson.toJSON <$> into @(Maybe Event) (readEventLine line)
           `shouldBe` Just (Aeson.toJSON event)

@@ -2,7 +2,7 @@ module Agent.Bob.Command where
 
 import Agent.Bob.Data.AgentId (AgentId)
 import Agent.Bob.Data.Config (Config, ConfigF(..))
-import Agent.Bob.Data.Event (Event, IsEvent(..), eventName)
+import Agent.Bob.Data.Event (Event, IsEvent(..), envelope, eventName)
 import Agent.Bob.Data.HarnessState (HarnessState(..))
 import Agent.Bob.Data.Level (Level(..))
 import Agent.Bob.Data.Role (Role(..))
@@ -36,7 +36,8 @@ class IsCommand c where
 
 -- | Update the harness state with new events.
 recordEvents
-  :: (Ask Config :> es, Console :> es, File :> es, State HarnessState :> es)
+  :: ( Ask Config :> es, Clock :> es, Console :> es, File :> es
+     , State HarnessState :> es )
   => AgentId -> [Event] -> Eff es ()
 recordEvents agentId newEvents = do
   modify $ \HarnessState{..} -> HarnessState
@@ -51,9 +52,10 @@ recordEvents agentId newEvents = do
     , ..
     }
   memoryPath <- asks (.memoryPath)
+  time <- getTime
   forM_ newEvents $ \(event :: e) -> do
     writeSection System Meta $ "Recorded event: " <> eventName @e
-    appendFile memoryPath $ compact event <> "\n"
+    appendFile memoryPath $ compact (envelope time event) <> "\n"
 
 -- | Run a command, record the events, and return the command result.
 step

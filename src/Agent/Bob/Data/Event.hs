@@ -4,6 +4,7 @@ import Agent.Bob.Prelude
 import Data.Aeson qualified as Aeson
 import Agent.Bob.Data.Task (Task)
 import Agent.Bob.Data.Message (Message)
+import Data.Time.Clock (UTCTime)
 
 -- TODO should our class constraints be done a different way?
 
@@ -21,6 +22,17 @@ instance Aeson.ToJSON Event where
     [ ("name", Aeson.toJSON $ eventName @e)
     , ("value", Aeson.toJSON e)
     ]
+
+-- | The persisted form of an event: the JSON above plus when it happened and
+-- a schema version, for forward-compatible parsing. Readers ignore the extra
+-- fields, so pre-envelope logs still restore.
+envelope :: UTCTime -> Event -> Aeson.Value
+envelope time (Event (e :: e)) = Aeson.object
+  [ ("name", Aeson.toJSON $ eventName @e)
+  , ("time", Aeson.toJSON time)
+  , ("value", Aeson.toJSON e)
+  , ("version", Aeson.toJSON (1 :: Int))
+  ]
 
 -- | Something that has happened.
 class IsEvent e where
