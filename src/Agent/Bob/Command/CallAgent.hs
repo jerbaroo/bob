@@ -18,7 +18,7 @@ import Agent.Bob.Effect.Console (Console, writeSection)
 import Agent.Bob.Effect.File (File, readFileMaybe)
 import Agent.Bob.Prelude
 import Agent.Bob.Pretty (Pretty(..))
-import Agent.Bob.Prompt.Build (buildPrompt)
+import Agent.Bob.Prompt.Build (buildPrompt, renderContextBreakdown)
 import Agent.Bob.Skill (getSkills)
 import Agent.Bob.Soul (getSoul)
 import Data.Aeson qualified as Aeson
@@ -36,6 +36,7 @@ instance IsCommand CallAgent where
   type Result CallAgent = AgentOutput
   runCommand agentId CallAgent = do
     agentInput <- mkAgentInput agentId
+    writeSection System Meta $ renderContextBreakdown agentInput
     writeSection System Debug $ "Prompt sent to model:\n" <> pretty (buildPrompt agentInput)
     agentOutput@AgentOutput{..} <- callAgent agentInput
     writeSection Assistant Debug $ "Raw output from model:\n" <> pretty raw

@@ -6,6 +6,7 @@ import Test.Event qualified
 import Test.File qualified
 import Test.Hspec (hspec)
 import Test.ProjectRoot qualified
+import Test.Prompt qualified
 import Test.Schema qualified
 
 main :: IO ()
@@ -15,3 +16,4 @@ main = hspec $ do
   Test.Config.spec
   Test.ProjectRoot.spec
   Test.File.spec
+  Test.Prompt.spec

@@ -2,6 +2,7 @@ module Agent.Bob where
 
 import Agent.Bob.Prelude hiding (readFile)
 import Agent.Bob.Command (Command(..), Harness, step)
+import Agent.Bob.Command.CallAgent (mkAgentInput)
 import Agent.Bob.Command.ReadConsole (ReadConsole(..))
 import Agent.Bob.Config (loadConfig)
 import Agent.Bob.Data.Config (ConfigF(..))
@@ -16,7 +17,7 @@ import Agent.Bob.Effect.Clock (runClock)
 import Agent.Bob.Effect.Console (runConsole, writeSection)
 import Agent.Bob.Effect.File (readFileLogErr, runFile)
 import Agent.Bob.Permissions (readPermissions, renderPermissions)
-import Agent.Bob.Prompt (ToPrompt(..))
+import Agent.Bob.Prompt.Build (renderContextBreakdown)
 import Agent.Bob.Skill (getSkills)
 import Agent.Bob.Pretty (Pretty(..))
 import Agent.Bob.UserCommand.Registry (parseCommand)
@@ -46,10 +47,12 @@ restoreSession agentId = do
         lastMay (mapMaybe eventTasks restored)
     , ..
     }
-  writeSection System Meta $
-    "Restored " <> pretty (length restored) <> " events."
+  writeSection System Info $ case length restored of
+    0 -> "No session history loaded."
+    1 -> "Loaded session history (1 entry)."
+    n -> "Loaded session history (" <> pretty n <> " entries)."
   when (malformed > 0) $ writeSection System Error $
-    "Skipped " <> pretty malformed <> " malformed event line(s) during restore."
+    "Skipped " <> pretty malformed <> " malformed session-history line(s)."
 
 -- | Scan the configured skills directories, store the result in state, and
 -- print what was found.
@@ -58,7 +61,7 @@ loadSkills = do
   found <- getSkills
   writeSection System Info $ case found of
     [] -> "No skills found."
-    _  -> "Skills:\n" <> toPrompt found
+    _  -> "Skills:\n" <> pretty found
 
 -- | Point the user at @/init@ when any referenced config file is missing.
 checkInitFiles :: Harness es => Eff es ()
@@ -86,7 +89,10 @@ main = do
     writeSection System Info $ "Hi. I'm Bob. Type /help for assistance.\n\n" <> pretty config
     checkInitFiles
     readPermissions >>= writeSection System Info . renderPermissions
-    loadSkills
     let agentId = AgentId 0
     restoreSession agentId
+    loadSkills
+    -- What a model call would send right now, so the user sees the size of
+    -- the restored context before the first call.
+    mkAgentInput agentId >>= writeSection System Info . renderContextBreakdown
     run agentId

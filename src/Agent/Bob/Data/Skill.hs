@@ -1,9 +1,11 @@
 module Agent.Bob.Data.Skill where
 
 import Agent.Bob.Prelude
+import Agent.Bob.Pretty (Pretty(..))
 import Agent.Bob.Prompt (ToPrompt(..))
 import Data.Aeson (FromJSON(..), withObject, (.:))
 import Data.Frontmatter (IResult(..), parseYamlFrontmatter)
+import Data.Text qualified as Text
 import Data.Text.Encoding (encodeUtf8)
 
 -- | A skill the model can pull in on demand: a directory containing a
@@ -13,6 +15,15 @@ data Skill = Skill
   , description :: Text
   , path        :: Text  -- ^ Path to SKILL.md, for the model to read on demand.
   }
+
+instance Pretty Skill where
+  pretty Skill{..} =
+    let maxDescriptionLength = 60
+        shortDescription = Text.take maxDescriptionLength (description)
+    in  name <> " (" <> path <> "): " <>
+          if Text.length description > maxDescriptionLength
+          then shortDescription <> "..."
+          else shortDescription
 
 instance ToPrompt Skill where
   toPrompt Skill{..} = name <> " (" <> path <> "): " <> description
