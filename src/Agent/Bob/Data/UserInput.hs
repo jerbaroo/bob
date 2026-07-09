@@ -1,12 +1,12 @@
 module Agent.Bob.Data.UserInput where
 
-import Agent.Bob.Prelude
-import Data.Aeson qualified as Aeson
-import Test.QuickCheck.Instances ()
 import Agent.Bob.Data.Event (IsEvent(..))
 import Agent.Bob.Data.Message (Message(..))
 import Agent.Bob.Data.Role (Role(..))
+import Agent.Bob.Prelude
 import Agent.Bob.Pretty (Pretty(..))
+import Data.Aeson qualified as Aeson
+import Test.QuickCheck.Instances ()
 
 newtype UserInput = UserInput Text
   deriving (Aeson.FromJSON, Aeson.ToJSON, Eq, From Text, IsString, Show)

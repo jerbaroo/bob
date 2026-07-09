@@ -86,6 +86,7 @@ library
                     , Agent.Bob.Data.ToolResult
                     , Agent.Bob.Data.Permission
                     , Agent.Bob.Data.UserInput
+                    , Agent.Bob.Data.UserInputParsed
                     , Agent.Bob.Effect.Agent
                     , Agent.Bob.Effect.Clock
                     , Agent.Bob.Effect.Console

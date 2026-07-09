@@ -1,7 +1,7 @@
 module Agent.Bob where
 
 import Agent.Bob.Prelude hiding (readFile)
-import Agent.Bob.Command (Command(..), step)
+import Agent.Bob.Command (step)
 import Agent.Bob.Command.ReadConsole (ReadConsole(..))
 import Agent.Bob.Config (loadConfig)
 import Agent.Bob.Data.Config (ConfigF(..))
@@ -9,6 +9,7 @@ import Agent.Bob.Data.AgentId (AgentId(..))
 import Agent.Bob.Data.HarnessState (HarnessState(..), mkHarnessState)
 import Agent.Bob.Data.Level (Level(..))
 import Agent.Bob.Data.Role (Role(..))
+import Agent.Bob.Data.UserInputParsed (UserInputParsed(..))
 import Agent.Bob.Effect.Agent (runAgent)
 import Agent.Bob.Effect.Clock (runClock)
 import Agent.Bob.Effect.Console (runConsole, writeSection)
@@ -20,7 +21,8 @@ import Agent.Bob.Permissions (readPermissions, renderPermissions)
 import Agent.Bob.Session (branchSessions, newSessionPath, restoreSession)
 import Agent.Bob.Skill (getSkills)
 import Agent.Bob.Pretty (Pretty(..))
-import Agent.Bob.UserCommand.Registry (parseCommand)
+import Agent.Bob.UserCommand (UserCommand(..))
+import Agent.Bob.UserCommand.AgentCall (AgentCall(..))
 import Control.Monad (filterM)
 import Data.Effect.State (evalStateIORef)
 import Data.Map qualified as Map
@@ -66,12 +68,13 @@ main = do
       startup agentId
       run agentId
 
--- | The main agentic loop: read user input, parse it into a command, execute.
+-- | The main agentic loop: read user input, then run it as a slash command or
+-- hand it to the model.
 run :: Harness es => AgentId -> Eff es ()
 run agentId = do
-  userInput <- step agentId ReadConsole
-  whenJust (parseCommand userInput) \(Command command) ->
-    void $ step agentId command
+  step agentId ReadConsole >>= \case
+    UserInputCommand (UserCommand command) -> void $ step agentId command
+    UserInputForModel userInput -> void $ step agentId (AgentCall userInput)
   run agentId
 
 -- | Announce this run's session and list this branch's previous ones, so the
