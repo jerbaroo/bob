@@ -24,7 +24,8 @@ defaultConfig root key = Config
   , engineUrl = "http://127.0.0.1:8080/v1/chat/completions"
   , gitBranch = key
   , logLevel = Debug
-  , memoryPath = from $ agentBobDir </> "memory" </> "episodic"
+  -- TODO make all these 'Text'
+  , memoryPath = from $ agentBobDir </> "sessions"
   , modelName = "Qwen"
   , modelTemperature = 0.5
   , noAsk = False

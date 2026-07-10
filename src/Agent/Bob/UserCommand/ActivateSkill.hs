@@ -1,7 +1,7 @@
 module Agent.Bob.UserCommand.ActivateSkill where
 
 import Agent.Bob.Command (IsCommand(..))
-import Agent.Bob.Data.Event (IsEvent(..))
+import Agent.Bob.Data.Event (IsEvent(..), KnownEvent)
 import Agent.Bob.Data.HarnessState (HarnessState(..))
 import Agent.Bob.Data.Level (Level(..))
 import Agent.Bob.Data.Role (Role(..))
@@ -39,6 +39,8 @@ instance IsCommand ActivateSkill where
         writeSection System Info $ "Activated skill: " <> name
       else writeSection System Error $ "No such skill: " <> name
     pure ((), [])
+
+instance KnownEvent ActivateSkill
 
 instance IsEvent ActivateSkill where
   eventTasks _ = Nothing

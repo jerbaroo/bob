@@ -4,7 +4,7 @@ import Data.Aeson qualified as Aeson
 import Agent.Bob.Command (IsCommand(..), recordEvents, step)
 import Agent.Bob.Command.CallAgent qualified as CallAgent
 import Agent.Bob.Data.AgentOutput (AgentMessageContent(..), AgentOutput(..))
-import Agent.Bob.Data.Event (IsEvent(..))
+import Agent.Bob.Data.Event (IsEvent(..), KnownEvent)
 import Agent.Bob.Data.Level (Level(..))
 import Agent.Bob.Data.Permission (Decision(..))
 import Agent.Bob.Data.Role (Role(..))
@@ -59,6 +59,8 @@ instance IsCommand AgentCall where
         recordEvents agentId $ from <$> outcomes
         output' <- step agentId CallAgent.CallAgent
         drainTools output'
+
+instance KnownEvent AgentCall
 
 instance IsEvent AgentCall where
   eventTasks _ = Nothing

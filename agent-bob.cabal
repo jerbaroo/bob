@@ -121,6 +121,7 @@ library
                     , Agent.Bob.UserCommand.Registry.Base
                     , Agent.Bob.UserCommand.Soul
                     , Agent.Bob.UserCommand.StateShow
+                    , Agent.Bob.Util.Aeson
 
     -- Modules included in this library but not exported.
     -- other-modules:

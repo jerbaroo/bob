@@ -6,11 +6,9 @@ import Agent.Bob.Data.Task (Task)
 import Agent.Bob.Data.Message (Message)
 import Data.Time.Clock (UTCTime)
 
--- TODO should our class constraints be done a different way?
+data Event = forall e. (Aeson.ToJSON e, IsEvent e, KnownEvent e) => Event e
 
-data Event = forall e. (Aeson.ToJSON e, IsEvent e, Typeable e) => Event e
-
-instance (Aeson.ToJSON e, IsEvent e, Typeable e) => From e Event where
+instance (Aeson.ToJSON e, IsEvent e, KnownEvent e) => From e Event where
   from = Event
 
 instance IsEvent Event where
@@ -23,9 +21,25 @@ instance Aeson.ToJSON Event where
     , ("value", Aeson.toJSON e)
     ]
 
+-- | Something that has happened.
+class IsEvent e where
+  -- | Updated list of tasks for the harness state.
+  eventTasks :: e -> Maybe [Task]
+  -- | How the event appears in the model's context.
+  eventToMessage :: e -> Maybe Message
+
+-- | The name identifying an event type in the session log.
+--
+-- Type-directed so a name can be derived from a type alone. Kept apart from
+-- 'IsEvent' so that 'Event' gets no instance.
+class KnownEvent e where
+  eventName :: Text
+  default eventName :: Typeable e => Text
+  eventName = from $ showTyCon @e
+
 -- | The persisted form of an event: the JSON above plus when it happened and
--- a schema version, for forward-compatible parsing. Readers ignore the extra
--- fields, so pre-envelope logs still restore.
+-- a schema version, for forward-compatible parsing.
+-- TODO use safe-json?
 envelope :: UTCTime -> Event -> Aeson.Value
 envelope time (Event (e :: e)) = Aeson.object
   [ ("name", Aeson.toJSON $ eventName @e)
@@ -33,19 +47,3 @@ envelope time (Event (e :: e)) = Aeson.object
   , ("value", Aeson.toJSON e)
   , ("version", Aeson.toJSON (1 :: Int))
   ]
-
--- | Something that has happened.
-class IsEvent e where
-  -- | Updated list of tasks for the harness state.
-  -- TODO should this be here?
-  eventTasks :: e -> Maybe [Task]
-  -- | How the event appears in the model's context; no default so a new
-  -- event type must decide explicitly whether the model sees it.
-  -- TODO should this be a separate typeclass?
-  eventToMessage :: e -> Maybe Message
-
-eventName :: forall t. Typeable t => Text
-eventName = from $ showTyCon @t
-
-eventName' :: Event -> Text
-eventName' (Event (_ :: t)) = eventName @t

@@ -2,7 +2,7 @@ module Agent.Bob.Command where
 
 import Agent.Bob.Data.AgentId (AgentId)
 import Agent.Bob.Data.Config (Config)
-import Agent.Bob.Data.Event (Event(..), IsEvent(..), envelope, eventName)
+import Agent.Bob.Data.Event (Event(..), IsEvent(..), KnownEvent(..), envelope)
 import Agent.Bob.Data.HarnessState (HarnessState(..))
 import Agent.Bob.Data.Level (Level(..))
 import Agent.Bob.Data.Role (Role(..))
@@ -11,22 +11,9 @@ import Agent.Bob.Effect.Console (Console, writeSection)
 import Agent.Bob.Effect.File (File, appendFile)
 import Agent.Bob.Effect.Harness (Harness)
 import Agent.Bob.Prelude hiding (appendFile)
-import Agent.Bob.Pretty (compact)
+import Agent.Bob.Util.Aeson (textViaJSON)
 import Data.Aeson qualified as Aeson
 import Data.Map qualified as Map
-
--- | An existential wrapper over any concrete command.
-data Command = forall c. (Aeson.ToJSON c, IsCommand c, IsEvent c) => Command c
-
-instance (Aeson.ToJSON c, IsCommand c, IsEvent c) => From c Command where
-  from = Command
-
-instance Aeson.ToJSON Command where
-  toJSON (Command c) = Aeson.toJSON c
-
-instance IsEvent Command where
-  eventTasks (Command c) = eventTasks c
-  eventToMessage (Command c) = eventToMessage c
 
 -- | Something the harness can do.
 class IsCommand c where
@@ -52,15 +39,16 @@ recordEvents agentId newEvents = do
     }
   sessionPath <- gets (.sessionPath)
   time <- getTime
-  forM_ newEvents $ \(event@(Event (_ :: e))) -> do
+  forM_ newEvents $ \event@(Event (_ :: e)) -> do
     writeSection System Meta $ "Recorded event: " <> eventName @e
-    appendFile sessionPath $ compact (envelope time event) <> "\n"
+    appendFile sessionPath $ textViaJSON (envelope time event) <> "\n"
 
 -- | Run a command, record the events, and return the command result.
 step
-  :: (Aeson.ToJSON c, Harness es, IsCommand c, IsEvent c)
+  :: (Aeson.ToJSON c, Harness es, IsCommand c, IsEvent c, KnownEvent c)
   => AgentId -> c -> Eff es (Result c)
 step agentId command = do
+  recordEvents agentId [Event command]
   (result, events) <- runCommand agentId command
-  recordEvents agentId $ from (Command command) : events
+  recordEvents agentId events
   pure result

@@ -3,7 +3,7 @@ module Agent.Bob.UserCommand.Help where
 import Data.Aeson qualified as Aeson
 import Data.Text qualified as Text
 import Agent.Bob.Command (IsCommand(..))
-import Agent.Bob.Data.Event (IsEvent(..))
+import Agent.Bob.Data.Event (IsEvent(..), KnownEvent)
 import Agent.Bob.Data.Level (Level(..))
 import Agent.Bob.Data.Role (Role(..))
 import Agent.Bob.Effect.Console (writeSection)
@@ -23,6 +23,8 @@ instance IsCommand Help where
   runCommand _agentId Help = do
     writeSection System Info $ pretty helpEntries
     pure ((), [])
+
+instance KnownEvent Help
 
 instance IsEvent Help where
   eventTasks _ = Nothing

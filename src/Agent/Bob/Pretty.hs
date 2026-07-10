@@ -12,11 +12,6 @@ class Pretty a where
   default pretty :: Aeson.ToJSON a => a -> Text
   pretty = decodeUtf8 . ByteString.toStrict . Aeson.encodePretty
 
--- | Compact, single-line JSON encoding. Suitable for one-value-per-line
--- (NDJSON) output, unlike 'pretty' which indents across multiple lines.
-compact :: Aeson.ToJSON a => a -> Text
-compact = decodeUtf8 . from . Aeson.encode
-
 instance {-# OVERLAPPABLE #-} Pretty a => Pretty [a] where
   pretty = Text.intercalate "\n" . fmap (("- " <>) . pretty)
 

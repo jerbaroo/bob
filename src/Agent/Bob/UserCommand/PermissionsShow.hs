@@ -2,7 +2,7 @@ module Agent.Bob.UserCommand.PermissionsShow where
 
 import Data.Aeson qualified as Aeson
 import Agent.Bob.Command (IsCommand(..))
-import Agent.Bob.Data.Event (IsEvent(..))
+import Agent.Bob.Data.Event (IsEvent(..), KnownEvent)
 import Agent.Bob.Data.Level (Level(..))
 import Agent.Bob.Data.Role (Role(..))
 import Agent.Bob.Effect.Console (writeSection)
@@ -22,6 +22,8 @@ instance IsCommand PermissionsShow where
     permissions <- readPermissions
     writeSection System Info $ renderPermissions permissions
     pure ((), [])
+
+instance KnownEvent PermissionsShow
 
 instance IsEvent PermissionsShow where
   eventTasks _ = Nothing

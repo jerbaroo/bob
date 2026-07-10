@@ -1,7 +1,7 @@
 module Agent.Bob.Command.ReadConsole where
 
 import Agent.Bob.Command (IsCommand(..))
-import Agent.Bob.Data.Event (IsEvent(..))
+import Agent.Bob.Data.Event (IsEvent(..), KnownEvent)
 import Agent.Bob.Data.UserInputParsed (UserInputParsed(..))
 import Agent.Bob.Effect.Console (readUserInput)
 import Agent.Bob.Prelude
@@ -21,6 +21,8 @@ instance IsCommand ReadConsole where
 
 instance Aeson.ToJSON ReadConsole where
   toJSON ReadConsole = Aeson.String "ReadConsole"
+
+instance KnownEvent ReadConsole
 
 instance IsEvent ReadConsole where
   eventTasks _ = Nothing

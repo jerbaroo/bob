@@ -2,7 +2,7 @@ module Agent.Bob.UserCommand.Registry.Base where
 
 import Data.Aeson qualified as Aeson
 import Agent.Bob.Command (IsCommand)
-import Agent.Bob.Data.Event (IsEvent)
+import Agent.Bob.Data.Event (IsEvent, KnownEvent)
 import Agent.Bob.Prelude
 import Agent.Bob.UserCommand (IsUserCommand)
 import Agent.Bob.UserCommand.ActivateSkill (ActivateSkill)
@@ -17,7 +17,9 @@ import Agent.Bob.UserCommand.StateShow (StateShow)
 
 -- | An existential over a user command type (not a value).
 data SomeUserCommand
-  = forall c. (Aeson.ToJSON c, IsCommand c, IsEvent c, IsUserCommand c, Typeable c)
+  = forall c.
+    ( Aeson.ToJSON c, IsCommand c, IsEvent c, IsUserCommand c, KnownEvent c
+    , Typeable c )
   => SomeUserCommand (Proxy c)
 
 -- | Every @/<command>@ except @/help@ (which renders this list and so cannot

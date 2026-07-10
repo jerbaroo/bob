@@ -6,7 +6,7 @@ import Agent.Bob.Data.AgentInput (AgentInput(..))
 import Agent.Bob.Data.AgentOutput (AgentMessageContent(..), AgentOutput(..), AgentOutputMeta(..))
 import Agent.Bob.Data.FinishReason (FinishReason(..))
 import Agent.Bob.Data.Config (Config, ConfigF(..))
-import Agent.Bob.Data.Event (IsEvent(..))
+import Agent.Bob.Data.Event (IsEvent(..), KnownEvent)
 import Agent.Bob.Data.HarnessState (HarnessState(..))
 import Agent.Bob.Data.Level (Level(..))
 import Agent.Bob.Data.Message (Message(..))
@@ -58,6 +58,8 @@ instance IsCommand CallAgent where
       Other reason  -> writeSection Assistant Error $ "Unexpected finish reason: " <> reason
       _             -> pure ()
     pure (agentOutput, [from agentOutput])
+
+instance KnownEvent CallAgent
 
 instance IsEvent CallAgent where
   eventTasks _ = Nothing

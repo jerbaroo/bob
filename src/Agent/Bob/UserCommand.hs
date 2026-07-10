@@ -1,7 +1,7 @@
 module Agent.Bob.UserCommand where
 
 import Agent.Bob.Command (IsCommand)
-import Agent.Bob.Data.Event (IsEvent)
+import Agent.Bob.Data.Event (IsEvent, KnownEvent)
 import Agent.Bob.Data.UserInput (UserInput)
 import Agent.Bob.Prelude
 import Data.Aeson qualified as Aeson
@@ -11,7 +11,8 @@ import Data.Text qualified as Text
 -- execute it directly with 'Agent.Bob.Command.step'.
 data UserCommand
   = forall c
-  . (Aeson.ToJSON c, IsCommand c, IsEvent c, IsUserCommand c, Typeable c)
+  . ( Aeson.ToJSON c, IsCommand c, IsEvent c, IsUserCommand c, KnownEvent c
+    , Typeable c )
   => UserCommand c
 
 instance Aeson.ToJSON UserCommand where

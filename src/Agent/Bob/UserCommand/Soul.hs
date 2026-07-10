@@ -2,7 +2,7 @@ module Agent.Bob.UserCommand.Soul where
 
 import Agent.Bob.Command (IsCommand(..))
 import Agent.Bob.Data.Config (ConfigF(..))
-import Agent.Bob.Data.Event (IsEvent(..))
+import Agent.Bob.Data.Event (IsEvent(..), KnownEvent)
 import Agent.Bob.Data.Level (Level(..))
 import Agent.Bob.Data.Role (Role(..))
 import Agent.Bob.Effect.Console (writeSection)
@@ -32,6 +32,8 @@ instance IsCommand Soul where
           (Nothing, _)         -> "Default soul (no soul_path configured):"
     writeSection System Info $ header <> "\n\n" <> soul
     pure ((), [])
+
+instance KnownEvent Soul
 
 instance IsEvent Soul where
   eventTasks _ = Nothing

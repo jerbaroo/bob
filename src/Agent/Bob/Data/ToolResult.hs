@@ -1,6 +1,6 @@
 module Agent.Bob.Data.ToolResult where
 
-import Agent.Bob.Data.Event (IsEvent(..))
+import Agent.Bob.Data.Event (IsEvent(..), KnownEvent)
 import Agent.Bob.Data.Message (Message(..))
 import Agent.Bob.Data.Role (Role(..))
 import Agent.Bob.Data.ToolName (ToolName(..))
@@ -28,6 +28,8 @@ instance Aeson.ToJSON ToolResult where
     [ ("tool", Aeson.toJSON toolName)
     , ("output", Aeson.toJSON output)
     ]
+
+instance KnownEvent ToolResult
 
 instance IsEvent ToolResult where
   eventTasks _ = Nothing

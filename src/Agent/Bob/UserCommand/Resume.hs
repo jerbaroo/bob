@@ -3,7 +3,7 @@ module Agent.Bob.UserCommand.Resume where
 import Data.Aeson qualified as Aeson
 import Agent.Bob.Command (IsCommand(..))
 import Agent.Bob.Data.Config (ConfigF(..))
-import Agent.Bob.Data.Event (IsEvent(..))
+import Agent.Bob.Data.Event (IsEvent(..), KnownEvent)
 import Agent.Bob.Data.HarnessState (HarnessState(..))
 import Agent.Bob.Data.Level (Level(..))
 import Agent.Bob.Data.Role (Role(..))
@@ -44,6 +44,8 @@ instance IsCommand Resume where
       _  -> writeSection System Error $
         "Ambiguous, matches:\n" <> pretty (sortOn Down candidates)
     pure ((), [])
+
+instance KnownEvent Resume
 
 instance IsEvent Resume where
   eventTasks _ = Nothing

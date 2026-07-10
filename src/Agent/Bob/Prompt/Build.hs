@@ -1,7 +1,7 @@
 module Agent.Bob.Prompt.Build where
 
 import Agent.Bob.Data.AgentInput (AgentInput(..))
-import Agent.Bob.Data.Event (Event, eventToMessage)
+import Agent.Bob.Data.Event (Event, IsEvent(..))
 import Agent.Bob.Data.Message (Message(..))
 import Agent.Bob.Data.Role (Role(..))
 import Agent.Bob.Prelude

@@ -3,7 +3,7 @@ module Agent.Bob.UserCommand.ConfigShow where
 import Data.Aeson qualified as Aeson
 import Agent.Bob.Command (IsCommand(..))
 import Agent.Bob.Data.Config (Config)
-import Agent.Bob.Data.Event (IsEvent(..))
+import Agent.Bob.Data.Event (IsEvent(..), KnownEvent)
 import Agent.Bob.Data.Level (Level(..))
 import Agent.Bob.Data.Role (Role(..))
 import Agent.Bob.Effect.Console (writeSection)
@@ -23,6 +23,8 @@ instance IsCommand ConfigShow where
     config :: Config <- ask
     writeSection System Info $ pretty config
     pure ((), [])
+
+instance KnownEvent ConfigShow
 
 instance IsEvent ConfigShow where
   eventTasks _ = Nothing

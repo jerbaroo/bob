@@ -3,7 +3,7 @@ module Agent.Bob.UserCommand.StateShow where
 import Data.Aeson qualified as Aeson
 import Agent.Bob.Command (IsCommand(..))
 import Agent.Bob.Data.Config (ConfigF(..))
-import Agent.Bob.Data.Event (IsEvent(..))
+import Agent.Bob.Data.Event (IsEvent(..), KnownEvent)
 import Agent.Bob.Data.HarnessState (HarnessState(..))
 import Agent.Bob.Data.Level (Level(..))
 import Agent.Bob.Data.Role (Role(..))
@@ -51,6 +51,8 @@ instance IsCommand StateShow where
 counted :: Int -> Text -> Text -> Text
 counted 1 singular _ = "1 " <> singular
 counted n _ plural = pretty n <> " " <> plural
+
+instance KnownEvent StateShow
 
 instance IsEvent StateShow where
   eventTasks _ = Nothing

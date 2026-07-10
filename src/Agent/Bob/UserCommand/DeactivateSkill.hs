@@ -2,7 +2,7 @@ module Agent.Bob.UserCommand.DeactivateSkill where
 
 import Data.Aeson qualified as Aeson
 import Agent.Bob.Command (IsCommand(..))
-import Agent.Bob.Data.Event (IsEvent(..))
+import Agent.Bob.Data.Event (IsEvent(..), KnownEvent)
 import Agent.Bob.Data.HarnessState (HarnessState(..))
 import Agent.Bob.Data.Level (Level(..))
 import Agent.Bob.Data.Role (Role(..))
@@ -31,6 +31,8 @@ instance IsCommand DeactivateSkill where
         writeSection System Info $ "Deactivated skill: " <> name
       else writeSection System Error $ "Skill not active: " <> name
     pure ((), [])
+
+instance KnownEvent DeactivateSkill
 
 instance IsEvent DeactivateSkill where
   eventTasks _ = Nothing

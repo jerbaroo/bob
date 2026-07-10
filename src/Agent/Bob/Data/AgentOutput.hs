@@ -1,15 +1,16 @@
 module Agent.Bob.Data.AgentOutput where
 
-import Agent.Bob.Data.Event (IsEvent (..))
+import Agent.Bob.Data.Event (IsEvent (..), KnownEvent)
 import Agent.Bob.Data.FinishReason (FinishReason (..))
 import Agent.Bob.Data.Message (Message(..), withoutThinking)
 import Agent.Bob.Data.Resolution (Resolution)
 import Agent.Bob.Data.Role (Role(..))
 import Agent.Bob.Data.Task (Task)
 import Agent.Bob.Prelude
-import Agent.Bob.Pretty (Pretty(..), compact)
+import Agent.Bob.Pretty (Pretty(..))
 import Agent.Bob.Tool (Tool)
 import Agent.Bob.Tool.Registry (parseToolRequest)
+import Agent.Bob.Util.Aeson (textViaJSON)
 import Data.Aeson ((.:), (.:?), (.!=))
 import Data.Aeson qualified as Aeson
 import Test.QuickCheck (Gen, frequency, listOf)
@@ -61,6 +62,8 @@ instance Aeson.ToJSON AgentOutput where
 -- | Everything is derived from 'raw'.
 instance Eq AgentOutput where
   a == b = a.raw == b.raw
+
+instance KnownEvent AgentOutput
 
 instance IsEvent AgentOutput where
   eventTasks AgentOutput{..} = Just agentMessageContent.tasks
@@ -136,7 +139,7 @@ instance Arbitrary AgentOutput where
                   ]
               ])
         ]
-      pure $ compact $ Aeson.object $
+      pure $ textViaJSON $ Aeson.object $
         [ ("message", Aeson.toJSON resolution)
         , ("remaining_tasks", Aeson.toJSON tasks)
         ] <> case toolCalls of

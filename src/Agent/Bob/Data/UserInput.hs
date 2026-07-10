@@ -1,6 +1,6 @@
 module Agent.Bob.Data.UserInput where
 
-import Agent.Bob.Data.Event (IsEvent(..))
+import Agent.Bob.Data.Event (IsEvent(..), KnownEvent)
 import Agent.Bob.Data.Message (Message(..))
 import Agent.Bob.Data.Role (Role(..))
 import Agent.Bob.Prelude
@@ -21,6 +21,8 @@ instance From UserInput String where
   from = via @Text
 
 instance From UserInput Text
+
+instance KnownEvent UserInput
 
 instance IsEvent UserInput where
   eventTasks _ = Nothing

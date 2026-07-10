@@ -1,7 +1,7 @@
 module Agent.Bob.Data.UserInputParsed where
 
 import Data.Aeson ((.=))
-import Agent.Bob.Data.Event (IsEvent(..))
+import Agent.Bob.Data.Event (IsEvent(..), KnownEvent)
 import Agent.Bob.Data.Message (Message(..))
 import Agent.Bob.Data.Role (Role(..))
 import Agent.Bob.Data.UserInput (UserInput(..))
@@ -20,6 +20,8 @@ instance Aeson.ToJSON UserInputParsed where
           UserInputCommand userCommand -> ("command", Aeson.toJSON userCommand)
           UserInputForModel userInput -> ("input", Aeson.toJSON userInput)
     in  Aeson.object [ "tag" .= tag, "value" .= value ]
+
+instance KnownEvent UserInputParsed
 
 instance IsEvent UserInputParsed where
   eventTasks _ = Nothing

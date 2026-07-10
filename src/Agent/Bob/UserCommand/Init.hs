@@ -2,7 +2,7 @@ module Agent.Bob.UserCommand.Init where
 
 import Agent.Bob.Command (IsCommand(..))
 import Agent.Bob.Data.Config (Config, ConfigF(..))
-import Agent.Bob.Data.Event (IsEvent(..))
+import Agent.Bob.Data.Event (IsEvent(..), KnownEvent)
 import Agent.Bob.Data.Level (Level(..))
 import Agent.Bob.Data.Role (Role(..))
 import Agent.Bob.Effect.Console (writeSection)
@@ -59,6 +59,8 @@ initGitignore = readFileMaybe gitignorePath >>= \case
  where
   gitignorePath = ".gitignore"
   gitignoreEntry = "agent-bob/memory/"
+
+instance KnownEvent Init
 
 instance IsEvent Init where
   eventTasks _ = Nothing

@@ -1,9 +1,9 @@
 module Test.Event (spec) where
 
-import Agent.Bob.Data.Event (Event(..), IsEvent, envelope)
-import Agent.Bob.Data.Event.Registry (LineResult(..), SomeEvent(..), knownEvents, readEventLine)
+import Agent.Bob.Data.Event (Event(..), IsEvent, KnownEvent, envelope)
+import Agent.Bob.Data.Event.Registry (LineResult(..), SomeEvent(..), eventsToParse, readEventLine)
 import Agent.Bob.Prelude
-import Agent.Bob.Pretty (compact)
+import Agent.Bob.Util.Aeson (textViaJSON)
 import Data.Aeson qualified as Aeson
 import Data.Text qualified as Text
 import Data.Time.Calendar (fromGregorian)
@@ -13,7 +13,7 @@ import Test.Hspec.QuickCheck qualified as H
 
 spec :: Spec
 spec = do
-  mapM_ eventPropTests knownEvents
+  mapM_ eventPropTests eventsToParse
   classifySpec
 
 -- | 'readEventLine' must separate genuine corruption from lines that are simply
@@ -56,12 +56,12 @@ jsonRoundtripPropTest = H.prop
 -- registry, and compare as JSON (raw 'Event's have no 'Eq').
 eventLineRoundtripPropTest
   :: forall e
-   . (Aeson.ToJSON e, Arbitrary e, IsEvent e, Show e, Typeable e)
+   . (Aeson.ToJSON e, Arbitrary e, IsEvent e, KnownEvent e, Show e, Typeable e)
   => Spec
 eventLineRoundtripPropTest = H.prop
   ("Session-log line roundtrip prop test: " <> Text.unpack (showTyCon @e))
   $ \(e :: e) ->
       let event = Event e
-          line = compact $ envelope (UTCTime (fromGregorian 2026 7 7) 0) event
+          line = textViaJSON $ envelope (UTCTime (fromGregorian 2026 7 7) 0) event
       in  Aeson.toJSON <$> into @(Maybe Event) (readEventLine line)
           `shouldBe` Just (Aeson.toJSON event)
